@@ -1,0 +1,48 @@
+Altium Designer Pick and Place Locations
+C:\Users\blinkinlabs\Blinkinlabs-Repos\LeoBlinky_2018\pcb\Project Outputs for LeoBlinky2018\Pick Place\Pick Place for LeoBlinky2018.txt
+
+========================================================================================================================
+File Design Information:
+
+Date:       02/06/18
+Time:       19:34
+Revision:   2987d3236c6d0bb14bd06cbb6f10f91570e11686
+Variant:    No variations
+Units used: mm
+
+Designator Comment                    Layer       Footprint           Center-X(mm) Center-Y(mm) Rotation Description                                                                                                      
+SW3        MSK-1133                   BottomLayer MSK-1133-NOHOLE     36.2000      42.6000      180      "SMD micro toggle switch, 2 position, 2 circuit"                                                                 
+SW2        TS-1185                    BottomLayer TS-1185             54.0000      12.0000      270      "Tact Switch, 3x4mm, no alignment pin, turtle style"                                                             
+SW1        TS-1185                    BottomLayer TS-1185             45.0000      12.0000      270      "Tact Switch, 3x4mm, no alignment pin, turtle style"                                                             
+U5         USBLC6-2                   BottomLayer SOT95P280X145-6N    10.4000      8.5943       360      "Very low capacitance ESD protection"                                                                            
+U4         W25Q80DVSSIG               BottomLayer WINB-SOIC-8_L       52.0000      33.5000      270      "Serial Flash Memory with Dual and Quad SPI, 8 Mbits, 2.7 to 3.6 V, -40 to 85 degC, 8-Pin SOIC (SS), RoHS, Tube" 
+U3         CH554T                     BottomLayer TSOP65P660X110-20N  60.0000      33.5000      270      "8-bit enhanced USB microcontroller"                                                                             
+J3         A01SB741B1-267             BottomLayer A01SB741B1-267      3.6000       6.6000       270      "Micro USB B type ??????"                                                                                        
+C4         "CAP 100nF 10V 0402(1005)" BottomLayer CAPC0402(1005)60_L  57.5000      28.4500      180      "CAP 100nF 10V ±10% 0402 (1005 Metric) Thickness 0.6mm SMD"                                                      
+C3         "CAP 100nF 10V 0402(1005)" BottomLayer CAPC0402(1005)60_L  50.4950      28.4500      180      "CAP 100nF 10V ±10% 0402 (1005 Metric) Thickness 0.6mm SMD"                                                      
+J2         SMH-105-02-T-D             BottomLayer SMTC-SMH-105-02-X-D 14.3830      50.0000      270      "SMT Horizontal Socket, -55 to 105 degC, 2.54 mm Pitch, 10-Pin, Female, RoHS"                                    
+J1         SMH-105-02-T-D             BottomLayer SMTC-SMH-105-02-X-D 125.6170     50.0000      90       "SMT Horizontal Socket, -55 to 105 degC, 2.54 mm Pitch, 10-Pin, Female, RoHS"                                    
+U2         BL8542B-ADJ                BottomLayer SOT95P280X130-5N    42.1107      34.5000      90       "0.85V startup, 1MHz, 300mA Iout,  Synchronous Boost Converter (adjustable output)"                              
+R3         "51K 1% 0402(1005)"        BottomLayer RESC0402(1005)_L    44.6749      32.6750      90       "51K 0.063W 1% 0402 (1005 Metric)  SMD"                                                                          
+R2         "200K 1% 0402(1005)"       BottomLayer RESC0402(1005)_L    44.6749      34.7000      90       "200K 0.063W 1% 0402 (1005 Metric)  SMD"                                                                         
+L1         FNR201610S2R2MT            BottomLayer FNR201610S          38.6107      35.2000      90       "Wire Wound SMD Power Inductors 2.0×1.6×1.0 2.2uH"                                                               
+C2         "CAP 4.7uF 10V 0603(1608)" BottomLayer CAPC0603(1608)55_L  42.8065      37.4250      360      "CAP 4.7uF 10V ±10% 0603 (1608 Metric) Thickness 0.55mm SMD"                                                     
+B2         AAA_SMD                    BottomLayer AAA_SMD             25.0000      33.5000      90       "AAA battery holder, surface mount."                                                                             
+B1         AAA_SMD                    BottomLayer AAA_SMD             115.0000     33.5000      90       "AAA battery holder, surface mount."                                                                             
+U1         ICN2053                    BottomLayer SOP64P600X175-24N   76.0576      33.5000      270      "16-Channel PWM Constant Current LED Sink Driver"                                                                
+R1         "2K 1% 0402(1005)"         BottomLayer RESC0402(1005)_N    70.0000      31.9500      360      "2K 0.063W 1% 0402 (1005 Metric)  SMD"                                                                           
+DS14       LED_335_GENERIC            TopLayer    LED_335_GENERIC     10.0000      2.5000       180      "SMD LED, side visible, generic"                                                                                 
+DS7        LED_335_GENERIC            TopLayer    LED_335_GENERIC     130.0000     64.5000      0        "SMD LED, side visible, generic"                                                                                 
+DS13       LED_335_GENERIC            TopLayer    LED_335_GENERIC     30.0000      2.5000       180      "SMD LED, side visible, generic"                                                                                 
+DS6        LED_335_GENERIC            TopLayer    LED_335_GENERIC     110.0000     64.5000      0        "SMD LED, side visible, generic"                                                                                 
+DS12       LED_335_GENERIC            TopLayer    LED_335_GENERIC     50.0000      2.5000       180      "SMD LED, side visible, generic"                                                                                 
+DS5        LED_335_GENERIC            TopLayer    LED_335_GENERIC     90.0000      64.5000      0        "SMD LED, side visible, generic"                                                                                 
+DS11       LED_335_GENERIC            TopLayer    LED_335_GENERIC     70.0000      2.5000       180      "SMD LED, side visible, generic"                                                                                 
+DS4        LED_335_GENERIC            TopLayer    LED_335_GENERIC     70.0000      64.5000      0        "SMD LED, side visible, generic"                                                                                 
+DS10       LED_335_GENERIC            TopLayer    LED_335_GENERIC     90.0000      2.5000       180      "SMD LED, side visible, generic"                                                                                 
+DS3        LED_335_GENERIC            TopLayer    LED_335_GENERIC     50.0000      64.5000      0        "SMD LED, side visible, generic"                                                                                 
+DS9        LED_335_GENERIC            TopLayer    LED_335_GENERIC     110.0000     2.5000       180      "SMD LED, side visible, generic"                                                                                 
+DS2        LED_335_GENERIC            TopLayer    LED_335_GENERIC     30.0000      64.5000      0        "SMD LED, side visible, generic"                                                                                 
+DS8        LED_335_GENERIC            TopLayer    LED_335_GENERIC     130.0000     2.5000       180      "SMD LED, side visible, generic"                                                                                 
+DS1        LED_335_GENERIC            TopLayer    LED_335_GENERIC     10.0000      64.5000      0        "SMD LED, side visible, generic"                                                                                 
+C1         "CAP 100nF 16V 0402(1005)" BottomLayer CAPC0402(1005)60_N  70.0000      30.4250      360      "CAP 100nF 16V -20% to +80% 0402 (1005 Metric) Thickness 0.6mm SMD"                                              
