@@ -2,6 +2,8 @@
 #include <QDebug>
 #include <QPainter>
 
+#define SERIAL_TIMEOUT_MS 2
+
 #define TTL_START_COUNT 5
 
 #define BORDER_SPACING 50
@@ -53,8 +55,13 @@ Badge::Badge(QString name, int ledCount, QWidget *parent) :
     connect(&frameTimer, &QTimer::timeout,
             this, &Badge::nextFrame);
 
+    rxLeftCount = 0;
+    rxRightCount = 0;
+
     tickTimer.start(1000);
     frameTimer.start(1000/30);  // Update at 30 fps
+
+    time.start();
 }
 
 void Badge::dumpState()
@@ -198,28 +205,28 @@ void Badge::drawFrame() {
 
 void Badge::sendGeometryLeft()
 {
-    emit(txLeftByte(RIGHT_GEOMETRY_HEADER));
-    emit(txLeftByte(ledsToRight + ledCount));
-    emit(txLeftByte(lettersToRight + letterCount));
+    emit(txLeft(RIGHT_GEOMETRY_HEADER));
+    emit(txLeft(ledsToRight + ledCount));
+    emit(txLeft(lettersToRight + letterCount));
 }
 
 void Badge::sendGeometryRight()
 {
-    emit(txRightByte(LEFT_GEOMETRY_HEADER));
-    emit(txRightByte(ledsToLeft + ledCount));
-    emit(txRightByte(lettersToLeft + letterCount));
-    emit(txRightByte(brightness));
+    emit(txRight(LEFT_GEOMETRY_HEADER));
+    emit(txRight(ledsToLeft + ledCount));
+    emit(txRight(lettersToLeft + letterCount));
+    emit(txRight(brightness));
 }
 
 void Badge::sendUpdateRight()
 {
-    emit(txRightByte(UPDATE_HEADER));
-    emit(txRightByte(pattern));
-    emit(txRightByte((frame>>8) & 0xFF));
-    emit(txRightByte((frame>>0) & 0xFF));
+    emit(txRight(UPDATE_HEADER));
+    emit(txRight(pattern));
+    emit(txRight((frame>>8) & 0xFF));
+    emit(txRight((frame>>0) & 0xFF));
 }
 
-void Badge::rxLeft(uint8_t ledsToLeft, uint8_t lettersToLeft, uint8_t brightness)
+void Badge::rxLeftGeometry(uint8_t ledsToLeft, uint8_t lettersToLeft, uint8_t brightness)
 {
     ttlLeft = TTL_START_COUNT;
 
@@ -236,7 +243,7 @@ void Badge::rxLeft(uint8_t ledsToLeft, uint8_t lettersToLeft, uint8_t brightness
     }
 }
 
-void Badge::rxRight(uint8_t ledsToRight, uint8_t lettersToRight)
+void Badge::rxRightGeometry(uint8_t ledsToRight, uint8_t lettersToRight)
 {
     ttlRight = TTL_START_COUNT;
 
@@ -251,42 +258,86 @@ void Badge::rxRight(uint8_t ledsToRight, uint8_t lettersToRight)
     }
 }
 
-void Badge::rxLeftByte(uint8_t byte)
+void Badge::rxLeft(ParityByte byte)
 {
-    rxLeftBytes.push_back(byte);
-
-    if((rxLeftBytes.front() == LEFT_GEOMETRY_HEADER) && (rxLeftBytes.length() == 4)) {
-        qDebug() << "Got left geometry header";
-        rxLeftBytes.pop_front();
-        uint8_t ledsToLeft = rxLeftBytes.takeFirst();
-        uint8_t lettersToLeft = rxLeftBytes.takeFirst();
-        uint8_t brightness = rxLeftBytes.takeFirst();
-
-        rxLeft(ledsToLeft, lettersToLeft, brightness);
+    // Check if we should dump the previous buffer
+    const int rxLeftEventTime = time.elapsed();
+    if((rxLeftCount > 0)
+            && (rxLeftEventTime - lastRxLeftEventTime) > SERIAL_TIMEOUT_MS) {
+        qDebug() << "Timeout, Dumping bufffer";
+        rxLeftCount = 0;
     }
-    else if((rxLeftBytes.front() == UPDATE_HEADER) && (rxLeftBytes.length() == 4)) {
-        qDebug() << "Got left update header";
-        rxLeftBytes.pop_front();
-        uint8_t pattern = rxLeftBytes.takeFirst();
-        uint16_t frame = rxLeftBytes.takeFirst() << 8;
-        frame |= rxLeftBytes.takeFirst();
+    lastRxLeftEventTime = rxLeftEventTime;
 
-        rxFrame(pattern, frame);
+    if(!byte.checkParity()) {
+        qDebug() << "Parity error, dumping buffer";
+        rxLeftCount = 0;
     }
 
+    rxLeftBytes[rxLeftCount++] = byte.data;
+
+    if(rxLeftBytes[0] == LEFT_GEOMETRY_HEADER) {
+        if(rxLeftCount == 4) {
+//            qDebug() << "Got left geometry header";
+
+            const uint8_t ledsToLeft = rxLeftBytes[1];
+            const uint8_t lettersToLeft = rxLeftBytes[2];
+            const uint8_t brightness = rxLeftBytes[3];
+
+            rxLeftGeometry(ledsToLeft, lettersToLeft, brightness);
+
+            rxLeftCount = 0;
+        }
+    }
+    else if(rxLeftBytes[0] == UPDATE_HEADER) {
+        if(rxLeftCount == 4) {
+//            qDebug() << "Got left update header";
+
+            const uint8_t pattern = rxLeftBytes[1];
+            const uint16_t frame = (rxLeftBytes[2] << 8) | rxLeftBytes[3];
+
+            rxFrame(pattern, frame);
+
+            rxLeftCount = 0;
+        }
+    }
+    else {
+        rxLeftCount = 0;
+    }
 }
 
-void Badge::rxRightByte(uint8_t byte)
+void Badge::rxRight(ParityByte byte)
 {
-    rxRightBytes.push_back(byte);
+    // Check if we should dump the previous buffer
+    const int rxRightEventTime = time.elapsed();
+    if((rxRightCount > 0)
+            && (rxRightEventTime - lastRxRightEventTime) > SERIAL_TIMEOUT_MS) {
+        qDebug() << "Timeout, Dumping bufffer";
+        rxRightCount = 0;
+    }
+    lastRxRightEventTime = rxRightEventTime;
 
-    if((rxRightBytes.front() == RIGHT_GEOMETRY_HEADER) && (rxRightBytes.length() == 3)) {
-        qDebug() << "Got right geometry header";
-        rxRightBytes.pop_front();
-        uint8_t ledsToRight = rxRightBytes.takeFirst();
-        uint8_t lettersToRight = rxRightBytes.takeFirst();
+    if(!byte.checkParity()) {
+        qDebug() << "Parity error, dumping buffer";
+        rxRightCount = 0;
+    }
 
-        rxRight(ledsToRight, lettersToRight);
+    rxRightBytes[rxRightCount++] = byte.data;
+
+    if(rxRightBytes[0] == RIGHT_GEOMETRY_HEADER) {
+        if(rxRightCount == 3) {
+//            qDebug() << "Got right geometry header";
+
+            const uint8_t ledsToRight = rxRightBytes[1];
+            const uint8_t lettersToRight = rxRightBytes[2];
+
+            rxRightGeometry(ledsToRight, lettersToRight);
+
+            rxRightCount = 0;
+        }
+    }
+    else {
+        rxRightCount = 0;
     }
 }
 

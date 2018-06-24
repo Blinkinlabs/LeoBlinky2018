@@ -4,6 +4,12 @@
 #include <QWidget>
 #include <QTimer>
 #include <QColor>
+#include <QTime>
+
+#include "paritybyte.h"
+
+#define SERIAL_BUFFER_LENGTH 4
+
 
 class Badge: public QWidget
 {
@@ -17,15 +23,15 @@ public:
     void paintEvent(QPaintEvent *event);
 
 signals:
-    void txRightByte(uint8_t byte);
-    void txLeftByte(uint8_t byte);
+    void txRight(ParityByte byte);
+    void txLeft(ParityByte byte);
 
 public slots:
     void tick();
     void nextFrame();
 
-    void rxLeftByte(uint8_t byte);
-    void rxRightByte(uint8_t byte);
+    void rxLeft(ParityByte byte);
+    void rxRight(ParityByte byte);
 
     void clickBrightnessButton();
 
@@ -37,14 +43,14 @@ private:
     void sendGeometryRight();
     void sendUpdateRight();
 
-    void rxLeft(uint8_t ledsToLeft, uint8_t lettersToLeft, uint8_t brightness);
-    void rxRight(uint8_t ledsToRight, uint8_t lettersToLeft);
+    void rxLeftGeometry(uint8_t ledsToLeft, uint8_t lettersToLeft, uint8_t brightness);
+    void rxRightGeometry(uint8_t ledsToRight, uint8_t lettersToLeft);
     void rxFrame(uint8_t pattern, uint16_t frame);
 
     QTimer tickTimer;
     QTimer frameTimer;
 
-//    QTimer txTimer;     // Used to simulate slow baud rate?
+    QTime time;
 
     QString name;
     int ledCount;
@@ -66,8 +72,13 @@ private:
     uint16_t frame;
     uint8_t brightness;
 
-    QList<uint8_t> rxRightBytes;
-    QList<uint8_t> rxLeftBytes;
+    uint8_t rxLeftBytes[SERIAL_BUFFER_LENGTH];
+    uint8_t rxLeftCount;
+    int lastRxLeftEventTime;
+
+    uint8_t rxRightBytes[SERIAL_BUFFER_LENGTH];
+    uint8_t rxRightCount;
+    int lastRxRightEventTime;
 };
 
 #endif // BADGE_H

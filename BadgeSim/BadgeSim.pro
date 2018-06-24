@@ -27,12 +27,16 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     badge.cpp \
-    badgeconnector.cpp
+    badgeconnector.cpp \
+    noisestream.cpp \
+    paritybyte.cpp
 
 HEADERS += \
         mainwindow.h \
     badge.h \
-    badgeconnector.h
+    badgeconnector.h \
+    noisestream.h \
+    paritybyte.h
 
 FORMS += \
         mainwindow.ui

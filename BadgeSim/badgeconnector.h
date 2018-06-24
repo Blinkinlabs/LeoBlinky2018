@@ -3,6 +3,7 @@
 
 #include <QCheckBox>
 #include "badge.h"
+#include "noisestream.h"
 
 class BadgeConnector : public QCheckBox
 {
@@ -15,6 +16,9 @@ public slots:
 private:
     Badge *leftBadge;
     Badge *rightBadge;
+
+    NoiseStream rightToLeft;
+    NoiseStream leftToRight;
 };
 
 #endif // BADGECONNETOR_H
