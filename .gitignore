@@ -15,7 +15,7 @@
 */*.s
 */*.dfu
 
-# C51 files
+# C51
 *.INC
 *.OBJ
 *.SRC
@@ -25,6 +25,18 @@
 *.hex
 *.bin
 !releases/*.bin
+
+# SDCC
+*.rel
+*.rst
+*.sym
+*.mem
+*.lk
+*.ihx
+*.asm
+
+# Qt 
+build-*/
 
 # Eagle PCB
 *.[bls]#[0-9]
@@ -39,4 +51,3 @@
 */*.PrjPcbStructure
 
 # Project specific
-firmware/src/flybynight
