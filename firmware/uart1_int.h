@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ch554.h>
 #include <stdint.h>
 #include <stdbool.h>
 

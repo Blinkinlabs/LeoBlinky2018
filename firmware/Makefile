@@ -2,14 +2,18 @@ TARGET= LeoBlinky2018
 
 CH554_SDCC= c:/Users/Blinkinlabs/Blinkinlabs-Repos/ch554_sdcc
 
-EXTRA_FLAGS=
+EXTRA_FLAGS="-DUART0_BAUD=57600" \
+	    "-DUART1_BAUD=57600"
 
 C_FILES= \
 	main.c \
+	leoblinky2018.c \
 	icn2053.c \
 	uart0_int.c \
 	uart1_int.c \
 	circular_buffer.c \
+	comms.c \
+	patterns.c \
 	$(CH554_SDCC)/include/debug.c
 
 pre-flash:

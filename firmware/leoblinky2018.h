@@ -1,3 +1,7 @@
+#pragma once
+
+#include <ch554.h>
+#include <stdint.h>
 
 #define PORT1_BASE  0x90
 #define PORT2_BASE  0xA0
@@ -37,3 +41,19 @@ SBIT(BUTTON2, PORT3_BASE, BUTTON2_PIN);
 #define LED_COUNT 16
 
 #define LETTER_COUNT 3
+
+extern uint8_t ledData[LED_COUNT];
+
+extern uint8_t ledsToLeft;
+extern uint8_t lettersToLeft;
+extern uint8_t ttlLeft;
+
+extern uint8_t ledsToRight;
+extern uint8_t lettersToRight;
+extern uint8_t ttlRight;
+
+extern uint8_t brightness;
+
+extern uint8_t pattern;
+extern uint16_t frame;
+
