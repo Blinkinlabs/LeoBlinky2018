@@ -1,6 +1,6 @@
 TARGET= LeoBlinky2018
 
-CH554_SDCC= /c/Users/matt/Blinkinlabs-Repos/ch554_sdcc
+CH554_SDCC= c:/Users/Blinkinlabs/Blinkinlabs-Repos/ch554_sdcc
 
 EXTRA_FLAGS=
 
