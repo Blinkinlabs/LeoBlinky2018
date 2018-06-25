@@ -21,3 +21,5 @@ extern uint8_t mask(CircularBuffer_t *buf, uint8_t val);
 extern bool push(CircularBuffer_t *buf, uint8_t data);
 
 extern bool pop(CircularBuffer_t *buf, uint8_t *data);
+
+extern bool peek(CircularBuffer_t *buf, uint8_t *data);

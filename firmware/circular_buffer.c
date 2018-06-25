@@ -33,3 +33,11 @@ bool pop(CircularBuffer_t *buf, uint8_t *data) {
     *data = buf->array[mask(buf, buf->readIndex++)];
     return true;
 }
+
+bool peek(CircularBuffer_t *buf, uint8_t *data) {
+    if(empty(buf))
+        return false;
+
+    *data = buf->array[mask(buf, buf->readIndex)];
+    return true;
+}

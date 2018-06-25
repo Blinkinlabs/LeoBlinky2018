@@ -3,6 +3,7 @@
 #include <ch554.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include "circular_buffer.h"
 
 #ifndef UART0_RX_LEN
 #define UART0_RX_LEN 4
@@ -19,6 +20,9 @@ extern void UART0_buf_init();
 extern bool UART0_buf_read(uint8_t *c);
 
 extern bool UART0_buf_write(const uint8_t c);
+
+extern CircularBuffer_t UART0_rxBuffer;
+extern CircularBuffer_t UART0_txBuffer;
 
 
 // Make sure SDCC can find the interrupt

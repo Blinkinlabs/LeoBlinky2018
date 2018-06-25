@@ -69,11 +69,14 @@ void initBoard() {
 
     pattern = 0;
     frame = 0;
+
+    frameReady = false;
 }
 
 void main() {
     uint8_t c = 0;
-    uint8_t tickTimer = 0; // TODO: replace me with timer
+    uint8_t geometryUpdateTimer = 0; // TODO: replace me with timer
+    uint8_t outputTimer = 0;
 
     initBoard();
 
@@ -100,24 +103,39 @@ void main() {
             UART0_buf_write(c);
 #endif
 
+        receiveLeft();
+        receiveRight();
 
-        if(pattern == 0)
-            fadeLetters();
-        else if(pattern == 1)
-            fadeLeds();
-
-        icn2053_updateDisplay(ledData, LED_COUNT);
-
-        tickTimer++;
-
-        if(tickTimer > 30) {
-            tickTimer = 0;
-
-            sendGeometryLeft();
-            sendGeometryRight();
-//            sendUpdateRight();
+        if(ledsToLeft == 0) {
+            // In master mode, fire a new frame every so often
+            // TODO: base this on a framerate timer?
+            outputTimer++;
+            if(outputTimer == 0) {
+                frame += 1;
+                frameReady = true;
+            }
         }
 
-        mDelaymS(30);   // Aim for some framerate
+        if(frameReady) {
+            frameReady = false;
+
+            sendUpdateRight();
+
+            if(pattern == 0)
+                fadeLetters();
+            else if(pattern == 1)
+                fadeLeds();
+
+
+            icn2053_updateDisplay(ledData, LED_PHYSICAL_CHANNELS);
+
+            geometryUpdateTimer++;
+            if(geometryUpdateTimer > 30) {
+                geometryUpdateTimer = 0;
+
+                sendGeometryLeft();
+                sendGeometryRight();
+            }
+        }
     }
 }

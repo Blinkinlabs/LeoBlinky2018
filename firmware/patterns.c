@@ -7,16 +7,20 @@
 
 
 uint8_t step = 0;
-float phase = 0;
+//float phase = 0;
 
 void fadeLeds() {
     uint8_t i;
     uint8_t brightness;
 
-    // Note: Using 65535 here seemed to hang the processor
-    brightness = 250*powf(phase, 1.8);
+    step = ((frame >> 4) % (totalLeds()/2)) - ledsToLeft/2;
+//    phase = frame / 10.0;
 
-    for(i = 0; i < LED_COUNT; i++) {
+    // Note: Using 65535 here seemed to hang the processor
+//    brightness = 250*powf(phase, 1.8);
+    brightness = 255;
+
+    for(i = 0; i < LED_PHYSICAL_CHANNELS; i++) {
         if (step == 0) {
             if(i==0 || i == 14)
                 ledData[i] = brightness;
@@ -59,8 +63,12 @@ void fadeLeds() {
             else
                 ledData[i] = 0;
         }
+        else {
+            ledData[i] = 0;
+        }
     }
 
+#if 0
     phase += .01;
     if(phase > 1.0) {
         phase = 0.0;
@@ -69,17 +77,21 @@ void fadeLeds() {
         if(step > 7)
             step = 0;
     }
-
+#endif
 }
 
 void fadeLetters() {
     uint8_t i;
     uint8_t brightness;
 
-    // Note: Using 65535 here seemed to hang the processor
-    brightness = 250*powf(phase, 1.8);
+    step = ((frame >> 6) % totalLetters()) - lettersToLeft;
+    //phase = frame / 10.0;
 
-    for(i = 0; i < LED_COUNT; i++) {
+    // Note: Using 65535 here seemed to hang the processor
+//    brightness = 250*powf(phase, 1.8);
+    brightness = 255;
+
+    for(i = 0; i < LED_PHYSICAL_CHANNELS; i++) {
         if (step == 0) {
             if(i==0 || i == 1 || i == 2 || i == 12 || i == 13 || i == 14)
                 ledData[i] = brightness;
@@ -98,8 +110,12 @@ void fadeLetters() {
             else
                 ledData[i] = 0;
         }
+        else {
+            ledData[i] = 0;
+        }
     }
 
+#if 0
     phase += .01;
     if(phase > 1.0) {
         phase = 0.0;
@@ -108,6 +124,7 @@ void fadeLetters() {
         if(step > 2)
             step = 0;
     }
+#endif
 }
 
 

@@ -2,6 +2,7 @@
 
 #include <ch554.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #define PORT1_BASE  0x90
 #define PORT2_BASE  0xA0
@@ -38,11 +39,14 @@ SBIT(BUTTON1, PORT3_BASE, BUTTON1_PIN);
 SBIT(BUTTON2, PORT3_BASE, BUTTON2_PIN);
 
 #define SCANLINE_COUNT 1
-#define LED_COUNT 16
-
+#define LED_PHYSICAL_CHANNELS 16
+#define LED_COUNT 14
 #define LETTER_COUNT 3
 
-extern uint8_t ledData[LED_COUNT];
+#define totalLeds() (LED_COUNT + ledsToLeft + ledsToRight)
+#define totalLetters() (LETTER_COUNT + lettersToLeft + lettersToRight)
+
+extern uint8_t ledData[LED_PHYSICAL_CHANNELS];
 
 extern uint8_t ledsToLeft;
 extern uint8_t lettersToLeft;
@@ -57,3 +61,4 @@ extern uint8_t brightness;
 extern uint8_t pattern;
 extern uint16_t frame;
 
+extern bool frameReady;

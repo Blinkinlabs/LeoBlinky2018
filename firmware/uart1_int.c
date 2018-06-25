@@ -3,7 +3,6 @@
 #include <stdbool.h>
 
 #include "uart1_int.h"
-#include "circular_buffer.h"
 
 
 bool UART1_txActive;    // True while data is being sent
