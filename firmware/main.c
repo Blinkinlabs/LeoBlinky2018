@@ -90,26 +90,29 @@ void initBoard() {
 }
 
 void main() {
-    uint8_t c = 0;
-
     uint8_t geometryUpdateTimer = 0;
     uint8_t outputTimer = 0;
+
+    bool button1State = 1;
+    bool button2State = 1;
 
     initBoard();
 
     while (1) {
 
-        if(BUTTON1 == 0) {
+        if((BUTTON1 == 0) && (button1State == 1)) {
             pattern++;
             if(pattern == PATTERN_COUNT)
                 pattern = 0;
         }
+        button1State = BUTTON1;
        
         // TODO: Should be brightness.
-        if(BUTTON2 == 0) {
+        if((BUTTON2 == 0) && (button2State == 1)) {
             EA = 0;
             bootloader();
         }
+        button2State = BUTTON2;
 
         receiveLeft();
         receiveRight();
@@ -118,7 +121,8 @@ void main() {
         // every 4.096mS.
         if(TF0) {
             TF0 = 0;
-
+            // ticks = ~244/fps
+            // 8 ticks = ~30fps
             // 4 ticks = ~60fps
             outputTimer++;
             if((ledsToLeft == 0) && (outputTimer > 3)) {
