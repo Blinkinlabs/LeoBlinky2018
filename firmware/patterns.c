@@ -84,7 +84,7 @@ void fadeLetters() {
     uint8_t i;
     uint8_t brightness;
 
-    step = ((frame >> 6) % totalLetters()) - lettersToLeft;
+    step = ((frame >> 5) % totalLetters()) - lettersToLeft;
     //phase = frame / 10.0;
 
     // Note: Using 65535 here seemed to hang the processor

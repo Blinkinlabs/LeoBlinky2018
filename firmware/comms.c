@@ -82,6 +82,7 @@ void receiveLeft() {
             UART1_buf_read(&ledsToLeft);
             UART1_buf_read(&lettersToLeft);
             UART1_buf_read(&brightness);
+            ttlLeft = 4;
         }
     }
 
@@ -153,6 +154,7 @@ void receiveRight() {
             UART0_buf_read(&header);
             UART0_buf_read(&ledsToRight);
             UART0_buf_read(&lettersToRight);
+            ttlRight = 4;
         }
     }
 

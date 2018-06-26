@@ -4,6 +4,18 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+
+// Peripheral usage:
+//
+// USB: Bootloader, pattern upload
+// UART0, UART1: Left and right direction communication
+// GPIO: P1.1-3: ICN2053 control
+//       P3.3,P3.5: Control buttons
+// SPI: Communication with external flash
+// Timer0: Tick counter for pattern playback
+// Timer1: UART baud rate generator
+// Timer2: GCLK generation for ICN2053
+
 #define PORT1_BASE  0x90
 #define PORT2_BASE  0xA0
 #define PORT3_BASE  0xB0

@@ -32,8 +32,24 @@ void initBoard() {
     TL2 = 254;
     TH2 = 255;
 
+    // Configure Timer0 for a system tick counter at ?Hz
+    // Used to:
+    // - set framerate (need resolution of ~1us)
+    // - reset UART error conditions (need resolution of ~3us)
+    // - send geometry updates (preferably at 1s intervals)
+//    TMOD = TMOD & ~bT1_GATE & ~bT0_CT & ~MASK_T0_MOD | bT0_M0;
 
-    // Configure output pins on port 1
+    TH0 = 0x12; // TODO: Remove me
+    TL0 = 0x34;
+
+    //TMOD &= ~bT0_GATE & ~bT0_CT & ~MASK_T0_MOD;
+    TMOD |= bT0_M0;
+    T2MOD |= bTMR_CLK | bT0_CLK;
+    TF0 = 0;
+    TR0 = 1;
+
+
+    // Configure output pins on port 
     P1_DIR_PU = 0x0F;   // TODO: Do we need to enable pullups?
     P1_MOD_OC = P1_MOD_OC
                 & ~(1<<LED_CLK_PIN)
@@ -75,12 +91,14 @@ void initBoard() {
 
 void main() {
     uint8_t c = 0;
-    uint8_t geometryUpdateTimer = 0; // TODO: replace me with timer
+
+    uint8_t geometryUpdateTimer = 0;
     uint8_t outputTimer = 0;
 
     initBoard();
 
     while (1) {
+
         if(BUTTON1 == 0) {
             pattern++;
             if(pattern == PATTERN_COUNT)
@@ -93,48 +111,60 @@ void main() {
             bootloader();
         }
 
-#if 0
-        // Loop UART0 RX to UART1 TX
-        if(UART0_buf_read(&c))
-            UART1_buf_write(c);
-
-        // And loop UART1 RX to UART0 TX
-        if(UART1_buf_read(&c))
-            UART0_buf_write(c);
-#endif
-
         receiveLeft();
         receiveRight();
 
-        if(ledsToLeft == 0) {
-            // In master mode, fire a new frame every so often
-            // TODO: base this on a framerate timer?
+        // count ticks. Using a 16MHz / 1 / 2^16 input, we get a tick
+        // every 4.096mS.
+        if(TF0) {
+            TF0 = 0;
+
+            // 4 ticks = ~60fps
             outputTimer++;
-            if(outputTimer == 0) {
+            if((ledsToLeft == 0) && (outputTimer > 3)) {
+                outputTimer = 0;
+
                 frame += 1;
                 frameReady = true;
             }
-        }
 
-        if(frameReady) {
-            frameReady = false;
+            if(frameReady) {
+                frameReady = false;
 
-            sendUpdateRight();
+                sendUpdateRight();
 
-            if(pattern == 0)
-                fadeLetters();
-            else if(pattern == 1)
-                fadeLeds();
+                if(pattern == 0)
+                    fadeLetters();
+                else if(pattern == 1)
+                    fadeLeds();
 
 
-            icn2053_updateDisplay(ledData, LED_PHYSICAL_CHANNELS);
+                icn2053_updateDisplay(ledData, LED_PHYSICAL_CHANNELS);
+            }
 
+            // 244 ticks ~= 1 second
+            // 122 ticks ~= .5 seconds
             geometryUpdateTimer++;
-            if(geometryUpdateTimer > 30) {
+            if(geometryUpdateTimer > 122) {
                 geometryUpdateTimer = 0;
 
                 sendGeometryLeft();
                 sendGeometryRight();
+
+                if(ttlLeft > 0) {
+                    ttlLeft--;
+                    if(ttlLeft == 0) {
+                        ledsToLeft = 0;
+                        lettersToLeft = 0;
+                    }
+                }
+                if(ttlRight > 0) {
+                    ttlRight--;
+                    if(ttlRight == 0) {
+                        ledsToRight = 0;
+                        lettersToRight = 0;
+                    }
+                }
             }
         }
     }
