@@ -10,7 +10,6 @@ bool UART1_txActive;    // True while data is being sent
 uint8_t UART1_rxBufferArray[UART1_RX_LEN];
 uint8_t UART1_txBufferArray[UART1_TX_LEN];
 
-uint8_t UART1_ISR_tmp;
 
 CircularBuffer_t UART1_rxBuffer = {
     UART1_rxBufferArray,
@@ -38,37 +37,38 @@ void UART1_buf_init() {
 void UART1_ISR(void) __interrupt (INT_NO_UART1) {
     // Handle an RX interrupt
     if(U1RI) {
-        UART1_ISR_tmp = SBUF1;
-        push(&UART1_rxBuffer, UART1_ISR_tmp);
+        cbuff_push(UART1_rxBuffer, SBUF1);
         U1RI = 0;
     }
     // Handle a TX interrupt
     if(U1TI) {
         U1TI = 0;
-        if(pop(&UART1_txBuffer, &UART1_ISR_tmp))
-            SBUF1 = UART1_ISR_tmp;
+	if(!cbuff_empty(UART1_txBuffer))
+	    SBUF1 = cbuff_pop(UART1_txBuffer);
         else
             UART1_txActive = false;
     }
 }
 
 bool UART1_buf_read(uint8_t *c) {
-    bool result;
+    if(cbuff_empty(UART1_rxBuffer))
+        return false;
 
     IE_UART1 = 0;
-    result = pop(&UART1_rxBuffer, c);
+    c = cbuff_pop(UART1_rxBuffer);
     IE_UART1 = 1;
 
-    return result;
+    return true;
 }
 
 bool UART1_buf_write(const uint8_t c) {
-    bool result = true;
-
     // If TX is busy, put it in the buffer,
     if (UART1_txActive) {
+	if(cbuff_full(UART1_txBuffer))
+	    return false;
+
         IE_UART1 = 0;
-        result = push(&UART1_txBuffer, c);
+        cbuff_push(UART1_txBuffer, c);
         IE_UART1 = 1;
     }
     // otherwise send it directly
@@ -77,5 +77,5 @@ bool UART1_buf_write(const uint8_t c) {
         SBUF1 = c;
     }
 
-    return result;
+    return true;
 }

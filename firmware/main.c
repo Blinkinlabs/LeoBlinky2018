@@ -132,22 +132,6 @@ void main() {
         receiveLeft();
         receiveRight();
 
-
-        // count ticks. Using a 16MHz / 1 / 2^16 input, we get a tick
-        // every 4.096mS.
-        if(TF0) {
-            TF0 = 0;
-            // ticks = ~244/fps
-            // 8 ticks = ~30fps
-            // 4 ticks = ~60fps
-            outputTimer++;
-            if((ledsToLeft == 0) && (outputTimer > 3)) {
-                outputTimer = 0;
-
-                frame += 1;
-                frameReady = true;
-            }
-
         if(brightnessChanged) {
             brightnessChanged = false;
             icn2053_setBrightness(brightness);
@@ -165,6 +149,21 @@ void main() {
 
             icn2053_updateDisplay(ledData, LED_PHYSICAL_CHANNELS);
         }
+
+        // count ticks. Using a 16MHz / 1 / 2^16 input, we get a tick
+        // every 4.096mS.
+        if(TF0) {
+            TF0 = 0;
+            // ticks = ~244/fps
+            // 8 ticks = ~30fps
+            // 4 ticks = ~60fps
+            outputTimer++;
+            if((ledsToLeft == 0) && (outputTimer > 3)) {
+                outputTimer = 0;
+
+                frame += 1;
+                frameReady = true;
+            }
 
             // 244 ticks ~= 1 second
             // 122 ticks ~= .5 seconds

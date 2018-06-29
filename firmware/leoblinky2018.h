@@ -58,7 +58,7 @@ SBIT(BUTTON2, PORT3_BASE, BUTTON2_PIN);
 #define totalLeds() (LED_COUNT + ledsToLeft + ledsToRight)
 #define totalLetters() (LETTER_COUNT + lettersToLeft + lettersToRight)
 
-extern uint8_t ledData[LED_PHYSICAL_CHANNELS];
+__pdata extern uint8_t ledData[LED_PHYSICAL_CHANNELS];
 
 extern uint8_t ledsToLeft;
 extern uint8_t lettersToLeft;

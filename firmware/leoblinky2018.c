@@ -1,6 +1,6 @@
 #include "leoblinky2018.h"
 
-uint8_t ledData[LED_PHYSICAL_CHANNELS];
+__pdata uint8_t ledData[LED_PHYSICAL_CHANNELS];
 
 uint8_t ledsToLeft;
 uint8_t lettersToLeft;

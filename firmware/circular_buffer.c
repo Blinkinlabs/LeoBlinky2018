@@ -2,6 +2,7 @@
 
 // https://www.snellman.net/blog/archive/2016-12-13-ring-buffers/
 
+#if 0
 uint8_t size(CircularBuffer_t *buf) {
     return (buf->writeIndex - buf->readIndex);
 }
@@ -11,7 +12,7 @@ bool empty(CircularBuffer_t *buf) {
 }
 
 bool full(CircularBuffer_t *buf) {
-    return size(buf) == buf->maxBufferLength;
+    return cbuff_size(buf) == buf->maxBufferLength;
 }
 
 uint8_t mask(CircularBuffer_t *buf, uint8_t val) {
@@ -19,25 +20,26 @@ uint8_t mask(CircularBuffer_t *buf, uint8_t val) {
 }
 
 bool push(CircularBuffer_t *buf, uint8_t data) {
-    if(full(buf))
+    if(cbuff_full(buf))
         return false;
 
-    buf->array[mask(buf, buf->writeIndex++)] = data;
+    buf->array[cbuff_mask(buf, buf->writeIndex++)] = data;
     return true;
 }
 
 bool pop(CircularBuffer_t *buf, uint8_t *data) {
-    if(empty(buf))
+    if(cbuff_empty(buf))
         return false;
 
-    *data = buf->array[mask(buf, buf->readIndex++)];
+    *data = buf->array[cbuff_mask(buf, buf->readIndex++)];
     return true;
 }
 
 bool peek(CircularBuffer_t *buf, uint8_t *data) {
-    if(empty(buf))
+    if(cbuff_empty(buf))
         return false;
 
-    *data = buf->array[mask(buf, buf->readIndex)];
+    *data = buf->array[cbuff_mask(buf, buf->readIndex)];
     return true;
 }
+#endif

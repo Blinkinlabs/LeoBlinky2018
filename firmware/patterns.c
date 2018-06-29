@@ -1,18 +1,12 @@
 #include "patterns.h"
 #include "leoblinky2018.h"
 
-#include <float.h>
-#include <math.h>
 #include <stdint.h>
 #include "uart1_int.h"
 
-uint8_t step = 0;
-//float phase = 0;
-
 void fadeLeds() {
     uint8_t i;
-
-    step = ((frame >> 1) % (totalLeds()/2)) - ledsToLeft/2;
+    uint8_t step = ((frame >> 1) % (totalLeds()/2)) - ledsToLeft/2;
 
     for(i = 0; i < LED_PHYSICAL_CHANNELS; i++) {
         if((step == 0) && (i==0 || i == 14))
@@ -36,8 +30,7 @@ void fadeLeds() {
 
 void fadeLetters() {
     uint8_t i;
-
-    step = ((frame >> 4) % totalLetters()) - lettersToLeft;
+    uint8_t step = ((frame >> 4) % totalLetters()) - lettersToLeft;
 
     for(i = 0; i < LED_PHYSICAL_CHANNELS; i++) {
         if((step == 0) && (i==0 || i == 1 || i == 2 || i == 12 || i == 13 || i == 14))

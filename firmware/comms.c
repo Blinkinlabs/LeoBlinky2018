@@ -2,6 +2,7 @@
 #include "uart1_int.h"
 #include "comms.h"
 #include "leoblinky2018.h"
+#include "circular_buffer.h"
 
 // Commands:
 // Command         size buf byte1            byte 2              byte 3
@@ -38,14 +39,11 @@ void sendUpdateRight() {
 }
 
 void receiveLeft() {
-    uint8_t buf;
+    uint8_t c;
     uint8_t bufferSize;
 
-    // If the buffer is empty, bail.
-    if(!peek(&UART1_rxBuffer, &buf))
+    if(cbuff_empty(UART1_rxBuffer))
         return;
-
-    bufferSize = size(&UART1_rxBuffer);
 
 #if rxTimeout
     // Check if we should dump the previous buffer
@@ -58,15 +56,10 @@ void receiveLeft() {
     lastRxLeftEventTime = rxLeftEventTime;
 #endif
 
-#if checkParity
-    if(!byte.checkParity()) {
-        qDebug() << "Parity error, dumping buffer";
-        rxLeftCount = 0;
-    }
-#endif
+    c = cbuff_peek(UART1_rxBuffer);
+    bufferSize = cbuff_size(UART1_rxBuffer);
 
-
-    if(buf == LEFT_GEOMETRY_HEADER) {
+    if(c == LEFT_GEOMETRY_HEADER) {
         if(bufferSize == 4) {
 //            qDebug() << "Got left geometry buf";
 
@@ -78,13 +71,13 @@ void receiveLeft() {
 //
 //            rxLeftCount = 0;
 
-            UART1_buf_read(&buf);
+            UART1_buf_read(&c);
             UART1_buf_read(&ledsToLeft);
             UART1_buf_read(&lettersToLeft);
-            UART1_buf_read(&buf);
+            UART1_buf_read(&c);
 
-            if(buf != brightness) {
-                brightness = buf;
+            if(c != brightness) {
+                brightness = c;
                 brightnessChanged = true;
             }
 
@@ -93,7 +86,7 @@ void receiveLeft() {
         }
     }
 
-    else if(buf == UPDATE_HEADER) {
+    else if(c == UPDATE_HEADER) {
         if(bufferSize == 4) {
 //            qDebug() << "Got left update buf";
 
@@ -104,7 +97,7 @@ void receiveLeft() {
 //
 //            rxLeftCount = 0;
 
-            UART1_buf_read(&buf);
+            UART1_buf_read(&c);
             UART1_buf_read(&pattern);
             UART1_buf_read(((uint8_t*)&frame)+1);
             UART1_buf_read(((uint8_t*)&frame)+0);
@@ -114,19 +107,17 @@ void receiveLeft() {
 
     else {
         //rxLeftCount = 0;
-        while(UART1_buf_read(&buf));
+        while(UART1_buf_read(&c));
     }
 }
 
 void receiveRight() {
-    uint8_t buf;
+    uint8_t c;
     uint8_t bufferSize;
 
-    // If the buffer is empty, bail.
-    if(!peek(&UART0_rxBuffer, &buf))
-        return;
 
-    bufferSize = size(&UART0_rxBuffer);
+    if(cbuff_empty(UART0_rxBuffer))
+        return;
 
 #if rxTimeout
     // Check if we should dump the previous buffer
@@ -139,14 +130,10 @@ void receiveRight() {
     lastRxLeftEventTime = rxLeftEventTime;
 #endif
 
-#if checkParity
-    if(!byte.checkParity()) {
-        qDebug() << "Parity error, dumping buffer";
-        rxLeftCount = 0;
-    }
-#endif
+    c = cbuff_peek(UART0_rxBuffer);
+    bufferSize = cbuff_size(UART0_rxBuffer);
 
-    if(buf == RIGHT_GEOMETRY_HEADER) {
+    if(c == RIGHT_GEOMETRY_HEADER) {
         if(bufferSize == 3) {
 //            qDebug() << "Got left geometry buf";
 
@@ -158,7 +145,7 @@ void receiveRight() {
 //
 //            rxLeftCount = 0;
 
-            UART0_buf_read(&buf);
+            UART0_buf_read(&c);
             UART0_buf_read(&ledsToRight);
             UART0_buf_read(&lettersToRight);
             ttlRight = 4;
@@ -167,6 +154,6 @@ void receiveRight() {
 
     else {
         //rxLeftCount = 0;
-        while(UART0_buf_read(&buf));
+        while(UART0_buf_read(&c));
     }
 }
