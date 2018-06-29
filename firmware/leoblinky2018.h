@@ -74,3 +74,4 @@ extern uint8_t pattern;
 extern uint16_t frame;
 
 extern bool frameReady;
+extern bool brightnessChanged;

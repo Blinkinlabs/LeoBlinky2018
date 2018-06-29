@@ -4,7 +4,7 @@
 #include "leoblinky2018.h"
 
 // Commands:
-// Command         size header byte1            byte 2              byte 3
+// Command         size buf byte1            byte 2              byte 3
 // LEFT_GEOMETRY    3   [0x01] [ledsToLeft]     [lettersToLeft]     [brightness]
 // RIGHT_GEOMETRY   3   [0x02] [ledsToRight]    [lettersToRight]
 // UPDATE           4   [0x03] [pattern]        [frameH]            [frameL]
@@ -38,11 +38,11 @@ void sendUpdateRight() {
 }
 
 void receiveLeft() {
-    uint8_t header;
+    uint8_t buf;
     uint8_t bufferSize;
 
     // If the buffer is empty, bail.
-    if(!peek(&UART1_rxBuffer, &header))
+    if(!peek(&UART1_rxBuffer, &buf))
         return;
 
     bufferSize = size(&UART1_rxBuffer);
@@ -66,9 +66,9 @@ void receiveLeft() {
 #endif
 
 
-    if(header == LEFT_GEOMETRY_HEADER) {
+    if(buf == LEFT_GEOMETRY_HEADER) {
         if(bufferSize == 4) {
-//            qDebug() << "Got left geometry header";
+//            qDebug() << "Got left geometry buf";
 
 //            const uint8_t ledsToLeft = rxLeftBytes[1];
 //            const uint8_t lettersToLeft = rxLeftBytes[2];
@@ -78,17 +78,24 @@ void receiveLeft() {
 //
 //            rxLeftCount = 0;
 
-            UART1_buf_read(&header);
+            UART1_buf_read(&buf);
             UART1_buf_read(&ledsToLeft);
             UART1_buf_read(&lettersToLeft);
-            UART1_buf_read(&brightness);
+            UART1_buf_read(&buf);
+
+            if(buf != brightness) {
+                brightness = buf;
+                brightnessChanged = true;
+            }
+
+
             ttlLeft = 4;
         }
     }
 
-    else if(header == UPDATE_HEADER) {
+    else if(buf == UPDATE_HEADER) {
         if(bufferSize == 4) {
-//            qDebug() << "Got left update header";
+//            qDebug() << "Got left update buf";
 
 //            const uint8_t pattern = rxLeftBytes[1];
 //            const uint16_t frame = (rxLeftBytes[2] << 8) | rxLeftBytes[3];
@@ -97,7 +104,7 @@ void receiveLeft() {
 //
 //            rxLeftCount = 0;
 
-            UART1_buf_read(&header);
+            UART1_buf_read(&buf);
             UART1_buf_read(&pattern);
             UART1_buf_read(((uint8_t*)&frame)+1);
             UART1_buf_read(((uint8_t*)&frame)+0);
@@ -107,16 +114,16 @@ void receiveLeft() {
 
     else {
         //rxLeftCount = 0;
-        while(UART1_buf_read(&header));
+        while(UART1_buf_read(&buf));
     }
 }
 
 void receiveRight() {
-    uint8_t header;
+    uint8_t buf;
     uint8_t bufferSize;
 
     // If the buffer is empty, bail.
-    if(!peek(&UART0_rxBuffer, &header))
+    if(!peek(&UART0_rxBuffer, &buf))
         return;
 
     bufferSize = size(&UART0_rxBuffer);
@@ -139,9 +146,9 @@ void receiveRight() {
     }
 #endif
 
-    if(header == RIGHT_GEOMETRY_HEADER) {
+    if(buf == RIGHT_GEOMETRY_HEADER) {
         if(bufferSize == 3) {
-//            qDebug() << "Got left geometry header";
+//            qDebug() << "Got left geometry buf";
 
 //            const uint8_t ledsToLeft = rxLeftBytes[1];
 //            const uint8_t lettersToLeft = rxLeftBytes[2];
@@ -151,7 +158,7 @@ void receiveRight() {
 //
 //            rxLeftCount = 0;
 
-            UART0_buf_read(&header);
+            UART0_buf_read(&buf);
             UART0_buf_read(&ledsToRight);
             UART0_buf_read(&lettersToRight);
             ttlRight = 4;
@@ -160,6 +167,6 @@ void receiveRight() {
 
     else {
         //rxLeftCount = 0;
-        while(UART0_buf_read(&header));
+        while(UART0_buf_read(&buf));
     }
 }

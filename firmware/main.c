@@ -26,8 +26,6 @@ void initBoard() {
     SPIMasterModeSet(0);    // Configure SPI for master mode operation
     Flash_ReadJEDECID();
 
-    Flash_EraseChip();
-
     // Configure Timer2 for GCLK generation at 4MHz
     RCLK = 0;
     TCLK = 0;
@@ -44,9 +42,6 @@ void initBoard() {
     // - reset UART error conditions (need resolution of ~3us)
     // - send geometry updates (preferably at 1s intervals)
 //    TMOD = TMOD & ~bT1_GATE & ~bT0_CT & ~MASK_T0_MOD | bT0_M0;
-
-    TH0 = 0x12; // TODO: Remove me
-    TL0 = 0x34;
 
     //TMOD &= ~bT0_GATE & ~bT0_CT & ~MASK_T0_MOD;
     TMOD |= bT0_M0;
@@ -93,6 +88,8 @@ void initBoard() {
     frame = 0;
 
     frameReady = false;
+
+    icn2053_setBrightness(brightness);
 }
 
 void main() {
@@ -104,6 +101,12 @@ void main() {
 
     initBoard();
 
+    // If both buttons are held down, jump to bootloader mode
+    if((BUTTON1 == 0) && (BUTTON2 == 0)) {
+        EA = 0;
+        bootloader();
+    }
+
     while (1) {
 
         if((BUTTON1 == 0) && (button1State == 1)) {
@@ -113,15 +116,22 @@ void main() {
         }
         button1State = BUTTON1;
        
-        // TODO: Should be brightness.
         if((BUTTON2 == 0) && (button2State == 1)) {
+#if 0
             EA = 0;
             bootloader();
+#else
+            brightness /= 2;
+            if(brightness < 1)
+                brightness = 255;
+            brightnessChanged = true;
+#endif
         }
         button2State = BUTTON2;
 
         receiveLeft();
         receiveRight();
+
 
         // count ticks. Using a 16MHz / 1 / 2^16 input, we get a tick
         // every 4.096mS.
@@ -138,19 +148,23 @@ void main() {
                 frameReady = true;
             }
 
-            if(frameReady) {
-                frameReady = false;
+        if(brightnessChanged) {
+            brightnessChanged = false;
+            icn2053_setBrightness(brightness);
+        }
 
-                sendUpdateRight();
+        if(frameReady) {
+            frameReady = false;
 
-                if(pattern == 0)
-                    fadeLetters();
-                else if(pattern == 1)
-                    fadeLeds();
+            sendUpdateRight();
 
+            if(pattern == 0)
+                fadeLetters();
+            else if(pattern == 1)
+                fadeLeds();
 
-                icn2053_updateDisplay(ledData, LED_PHYSICAL_CHANNELS);
-            }
+            icn2053_updateDisplay(ledData, LED_PHYSICAL_CHANNELS);
+        }
 
             // 244 ticks ~= 1 second
             // 122 ticks ~= .5 seconds

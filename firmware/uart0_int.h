@@ -6,7 +6,7 @@
 #include "circular_buffer.h"
 
 #ifndef UART0_RX_LEN
-#define UART0_RX_LEN 4
+#define UART0_RX_LEN 8
 #endif
 
 #ifndef UART0_TX_LEN

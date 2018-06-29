@@ -16,3 +16,4 @@ uint8_t pattern;
 uint16_t frame;
 
 bool frameReady;
+bool brightnessChanged;

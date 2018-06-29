@@ -16,19 +16,19 @@ void fadeLeds() {
 
     for(i = 0; i < LED_PHYSICAL_CHANNELS; i++) {
         if((step == 0) && (i==0 || i == 14))
-                ledData[i] = brightness;
+                ledData[i] = 255;
         else if((step == 1) && (i == 1 || i == 13))
-                ledData[i] = brightness;
+                ledData[i] = 255;
         else if ((step == 2) && (i == 2 || i == 12))
-                ledData[i] = brightness;
+                ledData[i] = 255;
         else if((step == 3) && (i==3 || i == 11))
-                ledData[i] = brightness;
+                ledData[i] = 255;
         else if((step == 4) && (i==4 || i == 10))
-                ledData[i] = brightness;
+                ledData[i] = 255;
         else if((step == 5) && (i == 5 || i == 9))
-                ledData[i] = brightness;
+                ledData[i] = 255;
         else if((step == 6) && (i == 6 || i == 8))
-                ledData[i] = brightness;
+                ledData[i] = 255;
         else
             ledData[i] = 0;
     }
@@ -41,11 +41,11 @@ void fadeLetters() {
 
     for(i = 0; i < LED_PHYSICAL_CHANNELS; i++) {
         if((step == 0) && (i==0 || i == 1 || i == 2 || i == 12 || i == 13 || i == 14))
-                ledData[i] = brightness;
+                ledData[i] = 255;
         else if((step == 1) && (i==3 || i == 11))
-                ledData[i] = brightness;
+                ledData[i] = 255;
         else if((step == 2) && (i==4 || i == 5 || i == 6 || i == 8 || i == 9 || i == 10))
-                ledData[i] = brightness;
+                ledData[i] = 255;
         else
             ledData[i] = 0;
     }

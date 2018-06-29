@@ -108,6 +108,10 @@ void icn2053_begin() {
     icn2053_EnableAllOutputChannels();
 }
 
+void icn2053_setBrightness(uint8_t brightness) {
+    icn2053_WriteConfigRegister(2, REG2_ADJ(0x1F) | REG2_I_DIV4N | REG2_IGAIN(brightness) | REG2_TEST);
+}
+
 void icn2053_updateDisplay(uint8_t* leds, uint8_t ledCount) {
     uint16_t expandedData;
 
