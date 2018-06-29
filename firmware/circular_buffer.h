@@ -18,11 +18,11 @@ typedef struct {
 //extern bool pop(CircularBuffer_t *buf, uint8_t *data);
 //extern bool peek(CircularBuffer_t *buf, uint8_t *data);
 
-#define cbuff_size(buf) ((buf).writeIndex - (buf).readIndex)
-#define cbuff_empty(buf) ((buf).readIndex == (buf).writeIndex)
-#define cbuff_full(buf) (cbuff_size(buf) == (buf).maxBufferLength)
-#define cbuff_mask(buf, val) (val & ((buf).maxBufferLength - 1))
+#define cbuff_size(buf) (buf.writeIndex - buf.readIndex)
+#define cbuff_empty(buf) (buf.readIndex == buf.writeIndex)
+#define cbuff_full(buf) (cbuff_size(buf) == buf.maxBufferLength)
+#define cbuff_mask(buf, val) (val & (buf.maxBufferLength - 1))
 
-#define cbuff_push(buf, data) ((buf).array[cbuff_mask(buf, (buf).writeIndex++)] = data)
-#define cbuff_pop(buf) ((buf).array[cbuff_mask(buf, (buf).readIndex++)])
-#define cbuff_peek(buf) ((buf).array[cbuff_mask(buf, (buf).readIndex)])
+#define cbuff_push(buf, data) (buf.array[cbuff_mask(buf, buf.writeIndex++)] = data)
+#define cbuff_pop(buf) (buf.array[cbuff_mask(buf, buf.readIndex++)])
+#define cbuff_peek(buf) (buf.array[cbuff_mask(buf, buf.readIndex)])

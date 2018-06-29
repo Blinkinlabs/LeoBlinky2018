@@ -55,7 +55,7 @@ bool UART1_buf_read(uint8_t *c) {
         return false;
 
     IE_UART1 = 0;
-    c = cbuff_pop(UART1_rxBuffer);
+    *c = cbuff_pop(UART1_rxBuffer);
     IE_UART1 = 1;
 
     return true;
@@ -64,8 +64,8 @@ bool UART1_buf_read(uint8_t *c) {
 bool UART1_buf_write(const uint8_t c) {
     // If TX is busy, put it in the buffer,
     if (UART1_txActive) {
-	if(cbuff_full(UART1_txBuffer))
-	    return false;
+	    if(cbuff_full(UART1_txBuffer))
+	        return false;
 
         IE_UART1 = 0;
         cbuff_push(UART1_txBuffer, c);
