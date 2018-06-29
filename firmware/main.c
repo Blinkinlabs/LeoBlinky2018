@@ -9,6 +9,8 @@
 #include "icn2053.h"
 #include "comms.h"
 #include "patterns.h"
+#include "spi.h"
+#include "spi_flash.h"
 
 void initBoard() {
     CfgFsys();
@@ -21,6 +23,10 @@ void initBoard() {
     UART0_buf_init();
     UART1_buf_init();
 
+    SPIMasterModeSet(0);    // Configure SPI for master mode operation
+    Flash_ReadJEDECID();
+
+    Flash_EraseChip();
 
     // Configure Timer2 for GCLK generation at 4MHz
     RCLK = 0;

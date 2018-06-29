@@ -15,6 +15,8 @@ C_FILES= \
 	circular_buffer.c \
 	comms.c \
 	patterns.c \
+	spi_flash.c \
+	$(CH554_SDCC)/include/spi.c \
 	$(CH554_SDCC)/include/debug.c
 
 pre-flash:
