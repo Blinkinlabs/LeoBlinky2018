@@ -5,20 +5,32 @@
 #include <stdbool.h>
 #include "circular_buffer.h"
 
+// Length of the RX buffer. Must be a multiple of 2
 #ifndef UART1_RX_LEN
 #define UART1_RX_LEN 8
 #endif
 
+// Length of the TX buffer. Must be a multiple of 2
 #ifndef UART1_TX_LEN
 #define UART1_TX_LEN 4
 #endif
 
-extern volatile __idata uint8_t UART1_rx_byte_count;
-
+// Initialize the circular buffer. Assumes that the
+// UART was already configured for the correct operating
+// mode and baud rate
 extern void UART1_buf_init();
 
+// Reset the receive buffer, clearing any data in it
+extern void UART1_buf_reset_rx();
+
+// Read from the circular buffer
+// @param c Location to store the read data, if successful
+// @return True if successful, false otherwise
 extern bool UART1_buf_read(uint8_t *c);
 
+// Write to the circular buffer
+// @param c Data to write to the buffer
+// @return True if successful, false otherwise
 extern bool UART1_buf_write(const uint8_t c);
 
 extern CircularBuffer_t UART1_rxBuffer;

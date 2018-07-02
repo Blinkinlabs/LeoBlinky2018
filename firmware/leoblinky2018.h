@@ -58,7 +58,13 @@ SBIT(BUTTON2, PORT3_BASE, BUTTON2_PIN);
 #define totalLeds() (LED_COUNT + ledsToLeft + ledsToRight)
 #define totalLetters() (LETTER_COUNT + lettersToLeft + lettersToRight)
 
-__pdata extern uint8_t ledData[LED_PHYSICAL_CHANNELS];
+
+// Reset value for watchdog. Sets the watchdog interval:
+// watchdog interval = 65536 / Fsys * (256 - WDOG_FEED_TIME)
+// With a 16MHz clock and WDOG_FEED_TIME = 207, the duration is ~.2s
+#define WDOG_FEED_TIME 207
+
+__xdata extern uint8_t ledData[LED_PHYSICAL_CHANNELS];
 
 extern uint8_t ledsToLeft;
 extern uint8_t lettersToLeft;

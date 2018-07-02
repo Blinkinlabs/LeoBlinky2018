@@ -3,6 +3,8 @@
 #include "uart0_int.h"
 #include "circular_buffer.h"
 
+#include "leoblinky2018.h"
+
 
 bool UART0_txActive;    // True while data is being sent
 
@@ -25,27 +27,36 @@ CircularBuffer_t UART0_txBuffer = {
 };
 
 
-// Configure UART0 for an interrupt-based circular buffer mode
 void UART0_buf_init() {
+    ES = 0;
+
+    cbuff_reset(UART0_rxBuffer);
+    cbuff_reset(UART0_txBuffer);
+
     UART0_txActive = false;
 
-    ES = 1;     // Enable UART0 interrupts
+    ES = 1;
     EA = 1;
 }
 
 void UART0_ISR(void) __interrupt (INT_NO_UART0) {
+    BUTTON1 = 0;
+
     if(RI) {
-        // TODO: Error on overflow?
-        cbuff_push(UART0_rxBuffer, SBUF);
+        if(!cbuff_full(UART0_rxBuffer))
+            cbuff_push(UART0_rxBuffer, SBUF);
         RI = 0;
     }
+
     if(TI) {
         TI = 0;
-	if(!cbuff_empty(UART0_txBuffer))
+        if(!cbuff_empty(UART0_txBuffer))
             SBUF = cbuff_pop(UART0_txBuffer);
         else
             UART0_txActive = false;
     }
+
+    BUTTON1 = 1;
 }
 
 bool UART0_buf_read(uint8_t *c) {
@@ -76,4 +87,11 @@ bool UART0_buf_write(const uint8_t c) {
     }
 
     return true;
+}
+
+void UART0_buf_reset_rx()
+{
+    ES = 0;
+    cbuff_reset(UART0_rxBuffer);
+    ES = 1;
 }

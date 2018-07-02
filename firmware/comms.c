@@ -60,54 +60,48 @@ void receiveLeft() {
     bufferSize = cbuff_size(UART1_rxBuffer);
 
     if(c == LEFT_GEOMETRY_HEADER) {
-        if(bufferSize == 4) {
-//            qDebug() << "Got left geometry buf";
-
-//            const uint8_t ledsToLeft = rxLeftBytes[1];
-//            const uint8_t lettersToLeft = rxLeftBytes[2];
-//            const uint8_t brightness = rxLeftBytes[3];
-//
-//            rxLeftGeometry(ledsToLeft, lettersToLeft, brightness);
-//
-//            rxLeftCount = 0;
-
+        if(bufferSize >= 4) {
             UART1_buf_read(&c);
             UART1_buf_read(&ledsToLeft);
             UART1_buf_read(&lettersToLeft);
             UART1_buf_read(&c);
+
+//            IE_UART1 = 0;
+//            c = cbuff_pop(UART1_rxBuffer);
+//            ledsToLeft = cbuff_pop(UART1_rxBuffer);
+//            lettersToLeft = cbuff_pop(UART1_rxBuffer);
+//            c = cbuff_pop(UART1_rxBuffer);
+//            IE_UART1 = 1;
 
             if(c != brightness) {
                 brightness = c;
                 brightnessChanged = true;
             }
 
-
             ttlLeft = 4;
         }
     }
 
     else if(c == UPDATE_HEADER) {
-        if(bufferSize == 4) {
-//            qDebug() << "Got left update buf";
-
-//            const uint8_t pattern = rxLeftBytes[1];
-//            const uint16_t frame = (rxLeftBytes[2] << 8) | rxLeftBytes[3];
-//
-//            rxFrame(pattern, frame);
-//
-//            rxLeftCount = 0;
-
+        if(bufferSize >= 4) {
             UART1_buf_read(&c);
             UART1_buf_read(&pattern);
             UART1_buf_read(((uint8_t*)&frame)+1);
             UART1_buf_read(((uint8_t*)&frame)+0);
+
+//            IE_UART1 = 0;
+//            c = cbuff_pop(UART1_rxBuffer);
+//            pattern = cbuff_pop(UART1_rxBuffer);
+//            frame = cbuff_pop(UART1_rxBuffer) << 8;
+//            frame |= cbuff_pop(UART1_rxBuffer);
+//            IE_UART1 = 1;
+
             frameReady = true;
         }
     }
 
     else {
-        //rxLeftCount = 0;
-        while(UART1_buf_read(&c));
+        UART1_buf_reset_rx();
     }
 }
 
@@ -134,26 +128,22 @@ void receiveRight() {
     bufferSize = cbuff_size(UART0_rxBuffer);
 
     if(c == RIGHT_GEOMETRY_HEADER) {
-        if(bufferSize == 3) {
-//            qDebug() << "Got left geometry buf";
-
-//            const uint8_t ledsToLeft = rxLeftBytes[1];
-//            const uint8_t lettersToLeft = rxLeftBytes[2];
-//            const uint8_t brightness = rxLeftBytes[3];
-//
-//            rxLeftGeometry(ledsToLeft, lettersToLeft, brightness);
-//
-//            rxLeftCount = 0;
-
+        if(bufferSize >= 3) {
             UART0_buf_read(&c);
             UART0_buf_read(&ledsToRight);
             UART0_buf_read(&lettersToRight);
+
+//            ES = 0;
+//            c = cbuff_pop(UART0_rxBuffer);
+//            ledsToRight = cbuff_pop(UART0_rxBuffer);
+//            lettersToRight = cbuff_pop(UART0_rxBuffer);
+//            ES = 1;
+
             ttlRight = 4;
         }
     }
 
     else {
-        //rxLeftCount = 0;
-        while(UART0_buf_read(&c));
+        UART0_buf_reset_rx();
     }
 }

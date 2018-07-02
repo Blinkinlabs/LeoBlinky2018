@@ -4,6 +4,7 @@
 
 #include "uart1_int.h"
 
+#include "leoblinky2018.h"
 
 bool UART1_txActive;    // True while data is being sent
 
@@ -25,29 +26,36 @@ CircularBuffer_t UART1_txBuffer = {
     UART1_TX_LEN
 };
 
-
-// Configure UART1 for an interrupt-based circular buffer mode
 void UART1_buf_init() {
+    IE_UART1 = 0;
+
+    cbuff_reset(UART1_rxBuffer);
+    cbuff_reset(UART1_txBuffer);
+
     UART1_txActive = false;
 
-    IE_UART1 = 1;     // Enable UART1 interrupts
+    IE_UART1 = 1;
     EA = 1;
 }
 
 void UART1_ISR(void) __interrupt (INT_NO_UART1) {
-    // Handle an RX interrupt
+    BUTTON2 = 0;
+
     if(U1RI) {
-        cbuff_push(UART1_rxBuffer, SBUF1);
+        if(!cbuff_full(UART1_rxBuffer))
+            cbuff_push(UART1_rxBuffer, SBUF1);
         U1RI = 0;
     }
-    // Handle a TX interrupt
+
     if(U1TI) {
         U1TI = 0;
-	if(!cbuff_empty(UART1_txBuffer))
-	    SBUF1 = cbuff_pop(UART1_txBuffer);
+        if(!cbuff_empty(UART1_txBuffer))
+            SBUF1 = cbuff_pop(UART1_txBuffer);
         else
             UART1_txActive = false;
     }
+
+    BUTTON2 = 1;
 }
 
 bool UART1_buf_read(uint8_t *c) {
@@ -78,4 +86,11 @@ bool UART1_buf_write(const uint8_t c) {
     }
 
     return true;
+}
+
+void UART1_buf_reset_rx()
+{
+    IE_UART1 = 0;
+    cbuff_reset(UART1_rxBuffer);
+    IE_UART1 = 1;
 }

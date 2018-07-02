@@ -3,8 +3,7 @@ TARGET= LeoBlinky2018
 CH554_SDCC= c:/Users/Blinkinlabs/Blinkinlabs-Repos/ch554_sdcc
 
 EXTRA_FLAGS="-DUART0_BAUD=57600" \
-	    "-DUART1_BAUD=57600" \
-	    #--stack-auto
+            "-DUART1_BAUD=57600"
 
 C_FILES= \
 	main.c \

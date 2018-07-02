@@ -90,6 +90,8 @@ void initBoard() {
     frameReady = false;
 
     icn2053_setBrightness(brightness);
+
+    CH554WDTModeSelect(1);
 }
 
 void main() {
@@ -104,6 +106,7 @@ void main() {
     // If both buttons are held down, jump to bootloader mode
     if((BUTTON1 == 0) && (BUTTON2 == 0)) {
         EA = 0;
+        CH554WDTModeSelect(0);
         bootloader();
     }
 
@@ -117,15 +120,10 @@ void main() {
         button1State = BUTTON1;
        
         if((BUTTON2 == 0) && (button2State == 1)) {
-#if 0
-            EA = 0;
-            bootloader();
-#else
             brightness /= 2;
             if(brightness < 1)
                 brightness = 255;
             brightnessChanged = true;
-#endif
         }
         button2State = BUTTON2;
 
@@ -154,6 +152,9 @@ void main() {
         // every 4.096mS.
         if(TF0) {
             TF0 = 0;
+
+            CH554WDTFeed(WDOG_FEED_TIME);
+
             // ticks = ~244/fps
             // 8 ticks = ~30fps
             // 4 ticks = ~60fps
