@@ -2,6 +2,6 @@
 
 #define PATTERN_COUNT           2
 
-extern void fadeLeds();
-extern void fadeLetters();
+extern void marchingLeds();
+extern void marchingLetters();
 

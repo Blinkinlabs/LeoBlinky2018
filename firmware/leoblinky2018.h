@@ -50,10 +50,26 @@ SBIT(LED_GCLK, PORT1_BASE, LED_GCLK_PIN);
 SBIT(BUTTON1, PORT3_BASE, BUTTON1_PIN);
 SBIT(BUTTON2, PORT3_BASE, BUTTON2_PIN);
 
-#define SCANLINE_COUNT 1
-#define LED_PHYSICAL_CHANNELS 16
+// Need to set one of these
+//#define VARIANT_DIS
+//#define VARIANT_ORI
+//#define VARIANT_ENT
+
+#if defined(VARIANT_DIS) || defined(VARIANT_ORI)
+
+#define ICN2053_COUNT 1
+#define LED_PHYSICAL_CHANNELS (ICN2053_COUNT*16)
 #define LED_COUNT 14
 #define LETTER_COUNT 3
+
+#elif defined(VARIANT_ENT)
+
+#define ICN2053_COUNT 2
+#define LED_PHYSICAL_CHANNELS (ICN2053_COUNT*16)
+#define LED_COUNT 18
+#define LETTER_COUNT 3
+
+#endif
 
 #define totalLeds() (LED_COUNT + ledsToLeft + ledsToRight)
 #define totalLetters() (LETTER_COUNT + lettersToLeft + lettersToRight)

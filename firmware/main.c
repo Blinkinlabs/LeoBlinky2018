@@ -141,11 +141,11 @@ void main() {
             sendUpdateRight();
 
             if(pattern == 0)
-                fadeLetters();
+                marchingLetters();
             else if(pattern == 1)
-                fadeLeds();
+                marchingLeds();
 
-            icn2053_updateDisplay(ledData, LED_PHYSICAL_CHANNELS);
+            icn2053_updateDisplay(ledData);
         }
 
         // count ticks. Using a 16MHz / 1 / 2^16 input, we get a tick
