@@ -22,6 +22,8 @@ C_FILES= \
 	comms.c \
 	patterns.c \
 	spi_flash.c \
+        usb_cdc.c \
+	uart.c \
 	$(CH554_SDCC)/include/spi.c \
 	$(CH554_SDCC)/include/debug.c
 

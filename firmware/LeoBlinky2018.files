@@ -16,3 +16,7 @@ uart0_int.c
 uart0_int.h
 uart1_int.c
 uart1_int.h
+usb_cdc.h
+usb_cdc.c
+uart.h
+uart.c

@@ -12,6 +12,8 @@
 #include "spi.h"
 #include "spi_flash.h"
 
+#include "usb_cdc.h"
+
 void initBoard() {
     CfgFsys();
 
@@ -22,6 +24,13 @@ void initBoard() {
 
     UART0_buf_init();
     UART1_buf_init();
+
+    USBDeviceCfg();
+    USBDeviceEndPointCfg();                                               //Endpoint configuration
+    USBDeviceIntCfg();                                                    //Interrupt initialization
+    UEP0_T_LEN = 0;
+    UEP1_T_LEN = 0;                                                       //Pre-use send length must be cleared
+    UEP2_T_LEN = 0;                                                       //Pre-use send length must be cleared
 
     SPIMasterModeSet(0);    // Configure SPI for master mode operation
     Flash_ReadJEDECID();
@@ -95,6 +104,9 @@ void initBoard() {
 }
 
 void main() {
+    bool usbMaster = false;
+    uint8_t usbRxCount = 0;
+
     uint8_t geometryUpdateTimer = 0;
     uint8_t outputTimer = 0;
 
@@ -112,6 +124,7 @@ void main() {
 
     while (1) {
 
+/// Check buttons
         if((BUTTON1 == 0) && (button1State == 1)) {
             pattern++;
             if(pattern == PATTERN_COUNT)
@@ -127,9 +140,56 @@ void main() {
         }
         button2State = BUTTON2;
 
+// Check UARTS
         receiveLeft();
         receiveRight();
 
+// Check USB
+        if(UsbConfig)
+        {
+            if(USBByteCount)   // USB receiving endpoint has data
+            {
+                ledData[usbRxCount++] = Ep2Buffer[USBBufOutPoint++];
+                USBByteCount--;
+                if(USBByteCount==0)
+                    UEP2_CTRL = UEP2_CTRL & ~ MASK_UEP_R_RES | UEP_R_RES_ACK;
+
+                // If we've gotten a full frame of data, display it
+                if(usbRxCount == LED_COUNT) {
+                    usbRxCount = 0;
+                    frameReady = true;
+
+                    usbMaster = true;
+                }
+            }
+//            if(UartByteCount)
+//                Uart_Timeout++;
+//            if(!UpPoint2_Busy)   //The endpoint is not busy (the first packet of data after idle, only used to trigger upload）
+//            {
+//                length = UartByteCount;
+//                if(length>0)
+//                {
+//                    if(length>39 || Uart_Timeout>100)
+//                    {
+//                        Uart_Timeout = 0;
+//                        if(Uart_Output_Point+length>UART_REV_LEN)
+//                            length = UART_REV_LEN-Uart_Output_Point;
+//                        UartByteCount -= length;
+//                        //Write upload endpoint
+//                        memcpy(Ep2Buffer+MAX_PACKET_SIZE,&Receive_Uart_Buf[Uart_Output_Point],length);
+//                        Uart_Output_Point+=length;
+//                        if(Uart_Output_Point>=UART_REV_LEN)
+//                            Uart_Output_Point = 0;
+//                        UEP2_T_LEN = length;                                        //Pre-use send length must be cleared
+//                        UEP2_CTRL = UEP2_CTRL & ~ MASK_UEP_T_RES | UEP_T_RES_ACK;   //Answer ACK
+//                        UpPoint2_Busy = 1;
+//                    }
+//                }
+//            }
+        }
+
+
+// Handle system changes
         if(brightnessChanged) {
             brightnessChanged = false;
             icn2053_setBrightness(brightness);
@@ -138,18 +198,20 @@ void main() {
         if(frameReady) {
             frameReady = false;
 
-            sendUpdateRight();
+            if(!usbMaster) {
+                sendUpdateRight();
 
-            if(pattern == 0)
-                marchingLetters();
-            else if(pattern == 1)
-                marchingLeds();
+                if(pattern == 0)
+                    marchingLetters();
+                else if(pattern == 1)
+                    marchingLeds();
+            }
 
             icn2053_updateDisplay(ledData);
         }
 
-        // count ticks. Using a 16MHz / 1 / 2^16 input, we get a tick
-        // every 4.096mS.
+// count ticks. Using a 16MHz / 1 / 2^16 input, we get a tick
+// every 4.096mS.
         if(TF0) {
             TF0 = 0;
 
@@ -159,7 +221,7 @@ void main() {
             // 8 ticks = ~30fps
             // 4 ticks = ~60fps
             outputTimer++;
-            if((ledsToLeft == 0) && (outputTimer > 3)) {
+            if((ledsToLeft == 0) && (outputTimer > 3) && !usbMaster) {
                 outputTimer = 0;
 
                 frame += 1;
