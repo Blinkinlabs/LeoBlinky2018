@@ -97,3 +97,5 @@ extern uint16_t frame;
 
 extern bool frameReady;
 extern bool brightnessChanged;
+
+extern __code const uint8_t streamToPhysical[LED_COUNT];

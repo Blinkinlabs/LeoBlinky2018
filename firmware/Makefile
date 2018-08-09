@@ -24,6 +24,7 @@ C_FILES= \
 	spi_flash.c \
         usb_cdc.c \
 	uart.c \
+        usb_protocol.c \
 	$(CH554_SDCC)/include/spi.c \
 	$(CH554_SDCC)/include/debug.c
 

@@ -20,3 +20,5 @@ usb_cdc.h
 usb_cdc.c
 uart.h
 uart.c
+usb_protocol.h
+usb_protocol.c

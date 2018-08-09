@@ -17,3 +17,26 @@ uint16_t frame;
 
 bool frameReady;
 bool brightnessChanged;
+
+#if defined(VARIANT_DIS)
+
+__code const uint8_t streamToPhysical[LED_COUNT] = {
+     0,  1,  2,  3,  4,  5,  6,
+    14, 13, 12, 11, 10,  9,  8,
+};
+
+#elif defined(VARIANT_ORI)
+
+__code const uint8_t streamToPhysical[LED_COUNT] = {
+     0,  1,  2,  3,  4,  5,  6,
+    14, 13, 12, 11, 10,  9,  8,
+};
+
+#elif defined(VARIANT_ENT)
+
+__code const uint8_t streamToPhysical[LED_COUNT] = {
+     0,  1,  2,  3,  4,  5,  6, 16,
+    14, 13, 12, 11, 10,  9,  8, 17,
+};
+
+#endif

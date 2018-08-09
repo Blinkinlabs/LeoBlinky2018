@@ -1,5 +1,6 @@
 #include <ch554.h>
 #include <debug.h>
+#include <string.h>
 #include <bootloader.h>
 
 #include "uart0_int.h"
@@ -12,7 +13,81 @@
 #include "spi.h"
 #include "spi_flash.h"
 
+#include "uart.h"
 #include "usb_cdc.h"
+#include "usb_protocol.h"
+
+void sendByte(uint8_t byte) {
+    Receive_Uart_Buf[Uart_Input_Point++] = byte;
+    UartByteCount++;                    //Current buffer remaining bytes to be fetched
+    if(Uart_Input_Point>=UART_REV_LEN)
+        Uart_Input_Point = 0;           //Write pointer
+}
+
+// Handle full messages here
+void parsePayload() { //uint16_t dataSize, uint8_t* data) {
+    uint32_t address;
+    uint8_t i;
+
+    switch(usb_protocol_payloadData[0]) {
+        case 0x00:  // Display some data on the LEDs
+        {
+            if(usb_protocol_payloadLength < 1 + LED_COUNT)
+                return;
+            for(i = 0; i < LED_COUNT; i++)
+                ledData[streamToPhysical[i]] = usb_protocol_payloadData[i+1];
+
+            frameReady = true;
+        }
+        case 0x01:  // Clear the flash
+        {
+            if(usb_protocol_payloadLength != 1) {
+                return;
+            }
+            Flash_EraseChip();
+
+            // send an OK to the pc
+            sendByte('!');
+        }
+            break;
+
+//        case 0x02:  // Program a page of memory
+//        {
+//            if(usb_protocol_payloadLength != (1 + 4 + 256)) {
+//                return;
+//            }
+
+//            address =
+//                  (data[1] << 24)
+//                + (data[2] << 16)
+//                + (data[3] <<  8)
+//                + (data[4]      );
+
+//            flash.setWriteEnable(true);
+//            flash.writePage(address, (uint8_t*) &data[5]);
+//            while(flash.busy()) {
+//                delay(10);
+//                watchdog_refresh();
+//            }
+//            flash.setWriteEnable(false);
+
+//            // send an OK to the pc
+//            sendByte('!');
+//        }
+//            break;
+//        case 0x03:  // Reload animations
+//        {
+//            reloadAnimations = true;
+
+//            // send an OK to the pc
+//            sendByte('!');
+//        }
+//            break;
+
+        default:
+            break;
+    }
+}
 
 void initBoard() {
     CfgFsys();
@@ -31,6 +106,8 @@ void initBoard() {
     UEP0_T_LEN = 0;
     UEP1_T_LEN = 0;                                                       //Pre-use send length must be cleared
     UEP2_T_LEN = 0;                                                       //Pre-use send length must be cleared
+
+    usb_protocol_reset();
 
     SPIMasterModeSet(0);    // Configure SPI for master mode operation
     Flash_ReadJEDECID();
@@ -104,11 +181,13 @@ void initBoard() {
 }
 
 void main() {
-    bool usbMaster = false;
-    uint8_t usbRxCount = 0;
+    bool streamingMode = false;
 
     uint8_t geometryUpdateTimer = 0;
     uint8_t outputTimer = 0;
+
+    uint8_t Uart_Timeout = 0;
+//    uint8_t length;
 
     bool button1State = 1;
     bool button2State = 1;
@@ -149,21 +228,21 @@ void main() {
         {
             if(USBByteCount)   // USB receiving endpoint has data
             {
-                ledData[usbRxCount++] = Ep2Buffer[USBBufOutPoint++];
+                streamingMode = true;
+
+                usb_protocol_parseByte(Ep2Buffer[USBBufOutPoint++]);
                 USBByteCount--;
                 if(USBByteCount==0)
                     UEP2_CTRL = UEP2_CTRL & ~ MASK_UEP_R_RES | UEP_R_RES_ACK;
 
                 // If we've gotten a full frame of data, display it
-                if(usbRxCount == LED_COUNT) {
-                    usbRxCount = 0;
-                    frameReady = true;
-
-                    usbMaster = true;
+                if(usb_protocol_payloadReady()) {
+                    parsePayload();
+                    usb_protocol_reset();
                 }
             }
-//            if(UartByteCount)
-//                Uart_Timeout++;
+            if(UartByteCount)
+                Uart_Timeout++;
 //            if(!UpPoint2_Busy)   //The endpoint is not busy (the first packet of data after idle, only used to trigger upload）
 //            {
 //                length = UartByteCount;
@@ -198,7 +277,7 @@ void main() {
         if(frameReady) {
             frameReady = false;
 
-            if(!usbMaster) {
+            if(!streamingMode) {
                 sendUpdateRight();
 
                 if(pattern == 0)
@@ -221,7 +300,7 @@ void main() {
             // 8 ticks = ~30fps
             // 4 ticks = ~60fps
             outputTimer++;
-            if((ledsToLeft == 0) && (outputTimer > 3) && !usbMaster) {
+            if((ledsToLeft == 0) && (outputTimer > 3) && !streamingMode) {
                 outputTimer = 0;
 
                 frame += 1;

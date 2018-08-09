@@ -34,7 +34,9 @@ volatile __idata uint8_t UpPoint2_Busy  = 0;   //Upload endpoint is busy flag
 
 //Device descriptor
 __code uint8_t DevDesc[] = {0x12,0x01,0x10,0x01,0x02,0x00,0x00,DEFAULT_ENDP0_SIZE,
-                            0x86,0x1a,0x22,0x57,0x00,0x01,0x01,0x02,
+                            0x86,0x1a,                        // VID: "QinHeng Electronics"
+                            0x88,0x88,                        // PID: imaginary!
+                            0x00,0x01,0x01,0x02,
                             0x03,0x01
                            };
 __code uint8_t CfgDesc[] ={
