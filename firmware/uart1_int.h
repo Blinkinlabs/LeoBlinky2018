@@ -7,12 +7,12 @@
 
 // Length of the RX buffer. Must be a multiple of 2
 #ifndef UART1_RX_LEN
-#define UART1_RX_LEN 2
+#define UART1_RX_LEN 8
 #endif
 
 // Length of the TX buffer. Must be a multiple of 2
 #ifndef UART1_TX_LEN
-#define UART1_TX_LEN 2
+#define UART1_TX_LEN 4
 #endif
 
 // Initialize the circular buffer. Assumes that the

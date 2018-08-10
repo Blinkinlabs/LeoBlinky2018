@@ -148,6 +148,10 @@ void icn2053_PreActive() {
 
 
 void icn2053_begin() {
+    LED_CLK = 0;
+    LED_MOSI = 0;
+    LED_LE = 0;
+
     // TODO: actually configure anything
 
     icn2053_WriteConfigRegister(1, REG1_SCAN_LINE(0) | REG1_OPT(1) | REG1_ACC_RATE(0x3));

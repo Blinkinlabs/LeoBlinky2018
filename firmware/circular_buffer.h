@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 typedef struct {
-    uint8_t* const array;
+    __idata uint8_t* const array;
     uint8_t readIndex;
     uint8_t writeIndex;
     const uint8_t maxBufferLength;

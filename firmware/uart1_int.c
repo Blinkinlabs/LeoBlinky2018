@@ -8,8 +8,8 @@
 
 bool UART1_txActive;    // True while data is being sent
 
-uint8_t UART1_rxBufferArray[UART1_RX_LEN];
-uint8_t UART1_txBufferArray[UART1_TX_LEN];
+__idata uint8_t UART1_rxBufferArray[UART1_RX_LEN];
+__idata uint8_t UART1_txBufferArray[UART1_TX_LEN];
 
 
 CircularBuffer_t UART1_rxBuffer = {

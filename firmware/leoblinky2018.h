@@ -80,6 +80,11 @@ SBIT(BUTTON2, PORT3_BASE, BUTTON2_PIN);
 // With a 16MHz clock and WDOG_FEED_TIME = 207, the duration is ~.2s
 #define WDOG_FEED_TIME 207
 
+
+// Flash page size
+#define FLASH_PAGESIZE          256
+
+
 __xdata extern uint8_t ledData[LED_PHYSICAL_CHANNELS];
 
 extern uint8_t ledsToLeft;

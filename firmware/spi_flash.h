@@ -1,12 +1,14 @@
 #pragma once
 #include <stdint.h>
 
-uint8_t Flash_ReadStatusRegister();
+extern uint8_t Flash_ReadStatusRegister();
 
-void Flash_EraseChip();
+extern void Flash_ReadJEDECID();
 
-void Flash_Read(uint32_t address, uint32_t length, uint8_t * flashData);
-void Flash_Write(uint32_t address, uint32_t length, uint8_t * flashData);
+extern void Flash_EraseChip();
+
+extern void Flash_Read(uint32_t address, uint32_t length, uint8_t * flashData);
+extern void Flash_Write(uint32_t address, uint32_t length, uint8_t * flashData);
 
 #define CMD_READJEDECID             (0x9F)
 #define CMD_READSTATUSREGISTER      (0x05)

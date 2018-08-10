@@ -51,38 +51,35 @@ void parsePayload() { //uint16_t dataSize, uint8_t* data) {
         }
             break;
 
-//        case 0x02:  // Program a page of memory
-//        {
-//            if(usb_protocol_payloadLength != (1 + 4 + 256)) {
-//                return;
-//            }
+        case 0x02:  // Program a page of memory
+        {
+            if(usb_protocol_payloadLength != (1 + 4 + FLASH_PAGESIZE)) {
+                return;
+            }
 
-//            address =
-//                  (data[1] << 24)
-//                + (data[2] << 16)
-//                + (data[3] <<  8)
-//                + (data[4]      );
+            address =
+                  (usb_protocol_payloadData[1] << 24)
+                + (usb_protocol_payloadData[2] << 16)
+                + (usb_protocol_payloadData[3] <<  8)
+                + (usb_protocol_payloadData[4]      );
 
-//            flash.setWriteEnable(true);
-//            flash.writePage(address, (uint8_t*) &data[5]);
-//            while(flash.busy()) {
-//                delay(10);
-//                watchdog_refresh();
-//            }
-//            flash.setWriteEnable(false);
+            Flash_Write(address,
+                        FLASH_PAGESIZE,
+                        &usb_protocol_payloadData[5]);
 
-//            // send an OK to the pc
-//            sendByte('!');
-//        }
-//            break;
-//        case 0x03:  // Reload animations
-//        {
+            // send an OK to the pc
+            sendByte('!');
+        }
+            break;
+
+        case 0x03:  // Reload animations
+        {
 //            reloadAnimations = true;
 
-//            // send an OK to the pc
-//            sendByte('!');
-//        }
-//            break;
+            // send an OK to the pc
+            sendByte('!');
+        }
+            break;
 
         default:
             break;
@@ -137,7 +134,7 @@ void initBoard() {
 
 
     // Configure output pins on port 
-    P1_DIR_PU = 0x0F;   // TODO: Do we need to enable pullups?
+//    P1_DIR_PU = 0x0F;   // TODO: Do we need to enable pullups?
     P1_MOD_OC = P1_MOD_OC
                 & ~(1<<LED_CLK_PIN)
                 & ~(1<<LED_MOSI_PIN)
@@ -148,12 +145,6 @@ void initBoard() {
                 | (1<<LED_MOSI_PIN)
                 | (1<<LED_LE_PIN)
                 | (1<<LED_GCLK_PIN);
-
-
-    LED_CLK = 0;
-    LED_MOSI = 0;
-    LED_LE = 0;
-
 
     // Note: inputs on port3 do not need to be initialized, since
     // they are set correctly be default.
@@ -177,7 +168,8 @@ void initBoard() {
 
     icn2053_setBrightness(brightness);
 
-    CH554WDTModeSelect(1);
+    // TODO: turn watchdog back on
+//    CH554WDTModeSelect(1);
 }
 
 void main() {
@@ -187,7 +179,7 @@ void main() {
     uint8_t outputTimer = 0;
 
     uint8_t Uart_Timeout = 0;
-//    uint8_t length;
+    uint8_t length;
 
     bool button1State = 1;
     bool button2State = 1;
@@ -242,29 +234,30 @@ void main() {
                 }
             }
             if(UartByteCount)
-                Uart_Timeout++;
-//            if(!UpPoint2_Busy)   //The endpoint is not busy (the first packet of data after idle, only used to trigger upload）
-//            {
-//                length = UartByteCount;
-//                if(length>0)
-//                {
-//                    if(length>39 || Uart_Timeout>100)
-//                    {
-//                        Uart_Timeout = 0;
-//                        if(Uart_Output_Point+length>UART_REV_LEN)
-//                            length = UART_REV_LEN-Uart_Output_Point;
-//                        UartByteCount -= length;
-//                        //Write upload endpoint
-//                        memcpy(Ep2Buffer+MAX_PACKET_SIZE,&Receive_Uart_Buf[Uart_Output_Point],length);
-//                        Uart_Output_Point+=length;
-//                        if(Uart_Output_Point>=UART_REV_LEN)
-//                            Uart_Output_Point = 0;
-//                        UEP2_T_LEN = length;                                        //Pre-use send length must be cleared
-//                        UEP2_CTRL = UEP2_CTRL & ~ MASK_UEP_T_RES | UEP_T_RES_ACK;   //Answer ACK
-//                        UpPoint2_Busy = 1;
-//                    }
-//                }
-//            }
+                Uart_Timeout++;     // Timer for buffering multiple uart rx bytes into a larger USB packet
+
+            if(!UpPoint2_Busy)   //The endpoint is not busy (the first packet of data after idle, only used to trigger upload）
+            {
+                length = UartByteCount;
+                if(length>0)
+                {
+                    if(length>39 || Uart_Timeout>100)
+                    {
+                        Uart_Timeout = 0;
+                        if(Uart_Output_Point+length>UART_REV_LEN)
+                            length = UART_REV_LEN-Uart_Output_Point;
+                        UartByteCount -= length;
+                        //Write upload endpoint
+                        memcpy(Ep2Buffer+MAX_PACKET_SIZE,&Receive_Uart_Buf[Uart_Output_Point],length);
+                        Uart_Output_Point+=length;
+                        if(Uart_Output_Point>=UART_REV_LEN)
+                            Uart_Output_Point = 0;
+                        UEP2_T_LEN = length;                                        //Pre-use send length must be cleared
+                        UEP2_CTRL = UEP2_CTRL & ~ MASK_UEP_T_RES | UEP_T_RES_ACK;   //Answer ACK
+                        UpPoint2_Busy = 1;
+                    }
+                }
+            }
         }
 
 
