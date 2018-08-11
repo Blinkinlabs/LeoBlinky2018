@@ -148,6 +148,28 @@ void icn2053_PreActive() {
 
 
 void icn2053_begin() {
+    // Configure Timer2 for GCLK generation at 4MHz
+    RCLK = 0;
+    TCLK = 0;
+
+    T2MOD |= bTMR_CLK | bT2_CLK | T2OE;
+    RCAP2L = 254;
+    RCAP2H = 255;
+    TL2 = 254;
+    TH2 = 255;
+
+    // Configure output pins on port
+    P1_MOD_OC = P1_MOD_OC
+                & ~(1<<LED_CLK_PIN)
+                & ~(1<<LED_MOSI_PIN)
+                & ~(1<<LED_LE_PIN)
+                & ~(1<<LED_GCLK_PIN);
+    P1_DIR_PU = P1_DIR_PU
+                | (1<<LED_CLK_PIN)
+                | (1<<LED_MOSI_PIN)
+                | (1<<LED_LE_PIN)
+                | (1<<LED_GCLK_PIN);
+
     LED_CLK = 0;
     LED_MOSI = 0;
     LED_LE = 0;

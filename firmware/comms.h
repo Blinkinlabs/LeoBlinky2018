@@ -1,9 +1,9 @@
 #pragma once
 
-extern void sendGeometryLeft();
-extern void sendGeometryRight();
-extern void sendUpdateRight();
+void sendGeometryLeft();
+void sendGeometryRight();
+void sendUpdateRight();
 
-extern void receiveLeft();
-extern void receiveRight();
+void receiveLeft();
+void receiveRight();
 

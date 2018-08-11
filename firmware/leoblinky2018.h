@@ -69,11 +69,16 @@ SBIT(BUTTON2, PORT3_BASE, BUTTON2_PIN);
 #define LED_COUNT 18
 #define LETTER_COUNT 3
 
+#else
+
+#error Please set variant to DIS, ORI, or ENT
+
 #endif
 
 #define totalLeds() (LED_COUNT + ledsToLeft + ledsToRight)
 #define totalLetters() (LETTER_COUNT + lettersToLeft + lettersToRight)
 
+#define SYSTEM_TICK_MS 4
 
 // Reset value for watchdog. Sets the watchdog interval:
 // watchdog interval = 65536 / Fsys * (256 - WDOG_FEED_TIME)
@@ -87,20 +92,23 @@ SBIT(BUTTON2, PORT3_BASE, BUTTON2_PIN);
 
 __xdata extern uint8_t ledData[LED_PHYSICAL_CHANNELS];
 
-extern uint8_t ledsToLeft;
-extern uint8_t lettersToLeft;
-extern uint8_t ttlLeft;
+__idata extern uint8_t ledsToLeft;
+__idata extern uint8_t lettersToLeft;
+__idata extern uint8_t ttlLeft;
 
-extern uint8_t ledsToRight;
-extern uint8_t lettersToRight;
-extern uint8_t ttlRight;
+__idata extern uint8_t ledsToRight;
+__idata extern uint8_t lettersToRight;
+__idata extern uint8_t ttlRight;
 
-extern uint8_t brightness;
+__idata extern uint8_t brightness;
 
-extern uint8_t pattern;
-extern uint16_t frame;
+__idata extern uint8_t pattern;
+__idata extern uint16_t frame;
 
-extern bool frameReady;
-extern bool brightnessChanged;
+extern bool frameReady;             // If true, the main loop should draw the current frame
+extern bool brightnessChanged;      // If true, the main loop should re-set the brightness
+extern bool patternChanged;         // If true, the main loop should re-load the pattern
 
 extern __code const uint8_t streamToPhysical[LED_COUNT];
+
+void systemTickSetup();

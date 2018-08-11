@@ -18,20 +18,20 @@
 // Initialize the circular buffer. Assumes that the
 // UART was already configured for the correct operating
 // mode and baud rate
-extern void UART0_buf_init();
+void UART0_buf_init();
 
 // Reset the receive buffer, clearing any data in it
-extern void UART0_buf_reset_rx();
+void UART0_buf_reset_rx();
 
 // Read from the circular buffer
 // @param c Location to store the read data, if successful
 // @return True if successful, false otherwise
-extern bool UART0_buf_read(uint8_t *c);
+bool UART0_buf_read(uint8_t *c);
 
 // Write to the circular buffer
 // @param c Data to write to the buffer
 // @return True if successful, false otherwise
-extern bool UART0_buf_write(const uint8_t c);
+bool UART0_buf_write(const uint8_t c);
 
 extern CircularBuffer_t UART0_rxBuffer;
 extern CircularBuffer_t UART0_txBuffer;

@@ -4,7 +4,7 @@
 #include <debug.h>
 #include <spi.h>
 #include "spi_flash.h"
-
+#include "leoblinky2018.h"
 
 uint8_t Flash_ReadStatusRegister()
 {
@@ -40,7 +40,8 @@ void Flash_EraseChip()
     SPIMasterDeassertCS();
 
     while (Flash_ReadStatusRegister() & STATUS_REG_BUSY) {
-        mDelaymS(10);
+        CH554WDTFeed(WDOG_FEED_TIME);
+        mDelaymS(5);
     }
 }
 
@@ -48,9 +49,9 @@ void Flash_Read(uint32_t address, uint32_t length, uint8_t *flashData)
 {
     SPIMasterAssertCS();
         CH554SPIMasterWrite(CMD_ARRAYREAD);
-        CH554SPIMasterWrite(*((uint8_t*)&(address) + 1));    // addr[23:16]
-        CH554SPIMasterWrite(*((uint8_t*)&(address) + 2));    // addr[15:8]
-        CH554SPIMasterWrite(*((uint8_t*)&(address) + 3));    // addr[7:0]
+        CH554SPIMasterWrite(*((uint8_t*)&(address) + 2));    // addr[23:16]
+        CH554SPIMasterWrite(*((uint8_t*)&(address) + 1));    // addr[15:8]
+        CH554SPIMasterWrite(*((uint8_t*)&(address) + 0));    // addr[7:0]
         CH554SPIMasterWrite(0x00);              // Wait states
         for(;length > 0; length--) {
             *flashData = CH554SPIMasterRead();
@@ -67,9 +68,9 @@ void Flash_Write(uint32_t address, uint32_t length, uint8_t *flashData)
 
     SPIMasterAssertCS();
         CH554SPIMasterWrite(CMD_PAGEPROGRAM);
-        CH554SPIMasterWrite(*((uint8_t*)&(address) + 1));    // addr[23:16]
-        CH554SPIMasterWrite(*((uint8_t*)&(address) + 2));    // addr[15:8]
-        CH554SPIMasterWrite(*((uint8_t*)&(address) + 3));    // addr[7:0]
+        CH554SPIMasterWrite(*((uint8_t*)&(address) + 2));    // addr[23:16]
+        CH554SPIMasterWrite(*((uint8_t*)&(address) + 1));    // addr[15:8]
+        CH554SPIMasterWrite(*((uint8_t*)&(address) + 0));    // addr[7:0]
         for(;length > 0; length--) {
             CH554SPIMasterWrite(*flashData);
             flashData++;
@@ -77,5 +78,5 @@ void Flash_Write(uint32_t address, uint32_t length, uint8_t *flashData)
     SPIMasterDeassertCS();
 
     while (Flash_ReadStatusRegister() & STATUS_REG_BUSY)
-        ;
+        mDelaymS(5);
 }

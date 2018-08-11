@@ -16,11 +16,13 @@ CircularBuffer_t UART1_rxBuffer = {
     UART1_rxBufferArray,
     0,
     0,
+    0,
     UART1_RX_LEN
 };
 
 CircularBuffer_t UART1_txBuffer = {
     UART1_txBufferArray,
+    0,
     0,
     0,
     UART1_TX_LEN
@@ -29,8 +31,8 @@ CircularBuffer_t UART1_txBuffer = {
 void UART1_buf_init() {
     IE_UART1 = 0;
 
-    cbuff_reset(UART1_rxBuffer);
-    cbuff_reset(UART1_txBuffer);
+    cbuff_reset(&UART1_rxBuffer);
+    cbuff_reset(&UART1_txBuffer);
 
     UART1_txActive = false;
 
@@ -43,14 +45,14 @@ void UART1_ISR(void) __interrupt (INT_NO_UART1) {
 
     if(U1RI) {
         if(!cbuff_full(UART1_rxBuffer))
-            cbuff_push(UART1_rxBuffer, SBUF1);
+            cbuff_push(&UART1_rxBuffer, SBUF1);
         U1RI = 0;
     }
 
     if(U1TI) {
         U1TI = 0;
         if(!cbuff_empty(UART1_txBuffer))
-            SBUF1 = cbuff_pop(UART1_txBuffer);
+            SBUF1 = cbuff_pop(&UART1_txBuffer);
         else
             UART1_txActive = false;
     }
@@ -63,7 +65,7 @@ bool UART1_buf_read(uint8_t *c) {
         return false;
 
     IE_UART1 = 0;
-    *c = cbuff_pop(UART1_rxBuffer);
+    *c = cbuff_pop(&UART1_rxBuffer);
     IE_UART1 = 1;
 
     return true;
@@ -76,7 +78,7 @@ bool UART1_buf_write(const uint8_t c) {
 	        return false;
 
         IE_UART1 = 0;
-        cbuff_push(UART1_txBuffer, c);
+        cbuff_push(&UART1_txBuffer, c);
         IE_UART1 = 1;
     }
     // otherwise send it directly
@@ -91,6 +93,6 @@ bool UART1_buf_write(const uint8_t c) {
 void UART1_buf_reset_rx()
 {
     IE_UART1 = 0;
-    cbuff_reset(UART1_rxBuffer);
+    cbuff_reset(&UART1_rxBuffer);
     IE_UART1 = 1;
 }

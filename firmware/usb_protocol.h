@@ -44,12 +44,12 @@
 // AnalogLED protocol decoder. Expects frames of data that look like this:
 // [header (2 bytes)][length (2 bytes)][payload (length bytes)][ibutton crc (1 byte)]
 
-extern void usb_protocol_reset();       // Reset the packet processor state machine
+void usb_protocol_reset();       // Reset the packet processor state machine
 
 // Read a byte into the packet processor, and handle it as possible.
 // @param data Data byte to read in
 // @return true if a payload is ready to read
-extern bool usb_protocol_parseByte(uint8_t data);
+bool usb_protocol_parseByte(uint8_t data);
 
 
 // Returns true if a payload is ready.

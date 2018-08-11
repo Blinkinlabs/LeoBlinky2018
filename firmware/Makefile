@@ -35,6 +35,7 @@ C_FILES= \
         usb_cdc.c \
 	uart.c \
         usb_protocol.c \
+        animations.c \
 	$(CH554_SDCC)/include/spi.c \
 	$(CH554_SDCC)/include/debug.c
 

@@ -1,45 +1,43 @@
 #include "circular_buffer.h"
 
-// https://www.snellman.net/blog/archive/2016-12-13-ring-buffers/
 
-#if 0
-uint8_t size(CircularBuffer_t *buf) {
-    return (buf->writeIndex - buf->readIndex);
+void cbuff_push(CircularBuffer_t *buff, uint8_t data)
+{
+//    Receive_Uart_Buf[Uart_Input_Point++] = byte;
+//    UartByteCount++;                    //Current buffer remaining bytes to be fetched
+//    if(Uart_Input_Point>=UART_REV_LEN)
+//        Uart_Input_Point = 0;           //Write pointer
+
+    buff->array[buff->writeIndex++] = data;
+
+    if(buff->writeIndex >= buff->bufferSize)
+        buff->writeIndex = 0;
+
+    buff->byteCount++;
 }
 
-bool empty(CircularBuffer_t *buf) {
-    return (buf->readIndex == buf->writeIndex);
+uint8_t cbuff_pop(CircularBuffer_t *buff)
+{
+    uint8_t data;
+
+    data = buff->array[buff->readIndex++];
+
+    if(buff->readIndex >= buff->bufferSize)
+        buff->readIndex = 0;
+
+    buff->byteCount--;
+
+    return data;
 }
 
-bool full(CircularBuffer_t *buf) {
-    return cbuff_size(buf) == buf->maxBufferLength;
+uint8_t cbuff_peek(CircularBuffer_t *buff)
+{
+    return buff->array[buff->readIndex];
 }
 
-uint8_t mask(CircularBuffer_t *buf, uint8_t val) {
-    return val & (buf->maxBufferLength - 1);
+void cbuff_reset(CircularBuffer_t *buff)
+{
+    buff->readIndex = 0;
+    buff->writeIndex = 0;
+    buff->byteCount = 0;
 }
-
-bool push(CircularBuffer_t *buf, uint8_t data) {
-    if(cbuff_full(buf))
-        return false;
-
-    buf->array[cbuff_mask(buf, buf->writeIndex++)] = data;
-    return true;
-}
-
-bool pop(CircularBuffer_t *buf, uint8_t *data) {
-    if(cbuff_empty(buf))
-        return false;
-
-    *data = buf->array[cbuff_mask(buf, buf->readIndex++)];
-    return true;
-}
-
-bool peek(CircularBuffer_t *buf, uint8_t *data) {
-    if(cbuff_empty(buf))
-        return false;
-
-    *data = buf->array[cbuff_mask(buf, buf->readIndex)];
-    return true;
-}
-#endif

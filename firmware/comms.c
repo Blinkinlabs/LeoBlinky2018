@@ -56,15 +56,15 @@ void receiveLeft() {
     lastRxLeftEventTime = rxLeftEventTime;
 #endif
 
-    c = cbuff_peek(UART1_rxBuffer);
+    c = cbuff_peek(&UART1_rxBuffer);
     bufferSize = cbuff_size(UART1_rxBuffer);
 
     if(c == LEFT_GEOMETRY_HEADER) {
         if(bufferSize >= 4) {
-            UART1_buf_read(&c);
+            UART1_buf_read(&c);         // discard the header
             UART1_buf_read(&ledsToLeft);
             UART1_buf_read(&lettersToLeft);
-            UART1_buf_read(&c);
+            UART1_buf_read(&c);         // brightness
 
 //            IE_UART1 = 0;
 //            c = cbuff_pop(UART1_rxBuffer);
@@ -84,8 +84,8 @@ void receiveLeft() {
 
     else if(c == UPDATE_HEADER) {
         if(bufferSize >= 4) {
-            UART1_buf_read(&c);
-            UART1_buf_read(&pattern);
+            UART1_buf_read(&c);         // discard the header
+            UART1_buf_read(&c);         // pattern
             UART1_buf_read(((uint8_t*)&frame)+1);
             UART1_buf_read(((uint8_t*)&frame)+0);
 
@@ -95,6 +95,11 @@ void receiveLeft() {
 //            frame = cbuff_pop(UART1_rxBuffer) << 8;
 //            frame |= cbuff_pop(UART1_rxBuffer);
 //            IE_UART1 = 1;
+
+            if(c != pattern) {
+                pattern = c;
+                patternChanged = true;
+            }
 
             frameReady = true;
         }
@@ -124,7 +129,7 @@ void receiveRight() {
     lastRxLeftEventTime = rxLeftEventTime;
 #endif
 
-    c = cbuff_peek(UART0_rxBuffer);
+    c = cbuff_peek(&UART0_rxBuffer);
     bufferSize = cbuff_size(UART0_rxBuffer);
 
     if(c == RIGHT_GEOMETRY_HEADER) {

@@ -12,6 +12,7 @@
 #include "patterns.h"
 #include "spi.h"
 #include "spi_flash.h"
+#include "animations.h"
 
 #include "uart.h"
 #include "usb_cdc.h"
@@ -57,11 +58,13 @@ void parsePayload() { //uint16_t dataSize, uint8_t* data) {
                 return;
             }
 
-            address =
-                  (usb_protocol_payloadData[1] << 24)
-                + (usb_protocol_payloadData[2] << 16)
-                + (usb_protocol_payloadData[3] <<  8)
-                + (usb_protocol_payloadData[4]      );
+            address = usb_protocol_payloadData[1];
+            address = address << 8;
+            address |= usb_protocol_payloadData[2];
+            address = address << 8;
+            address |= usb_protocol_payloadData[3];
+            address = address << 8;
+            address |= usb_protocol_payloadData[4];
 
             Flash_Write(address,
                         FLASH_PAGESIZE,
@@ -89,103 +92,6 @@ void parsePayload() { //uint16_t dataSize, uint8_t* data) {
 void initBoard() {
     CfgFsys();
 
-    //UART0Setup();
-    mInitSTDIO();
-    UART1Setup();
-    CH554UART1Alter();
-
-    UART0_buf_init();
-    UART1_buf_init();
-
-    USBDeviceCfg();
-    USBDeviceEndPointCfg();                                               //Endpoint configuration
-    USBDeviceIntCfg();                                                    //Interrupt initialization
-    UEP0_T_LEN = 0;
-    UEP1_T_LEN = 0;                                                       //Pre-use send length must be cleared
-    UEP2_T_LEN = 0;                                                       //Pre-use send length must be cleared
-
-    usb_protocol_reset();
-
-    SPIMasterModeSet(0);    // Configure SPI for master mode operation
-    Flash_ReadJEDECID();
-
-    // Configure Timer2 for GCLK generation at 4MHz
-    RCLK = 0;
-    TCLK = 0;
-
-    T2MOD |= bTMR_CLK | bT2_CLK | T2OE;
-    RCAP2L = 254;
-    RCAP2H = 255;
-    TL2 = 254;
-    TH2 = 255;
-
-    // Configure Timer0 for a system tick counter at ?Hz
-    // Used to:
-    // - set framerate (need resolution of ~1us)
-    // - reset UART error conditions (need resolution of ~3us)
-    // - send geometry updates (preferably at 1s intervals)
-//    TMOD = TMOD & ~bT1_GATE & ~bT0_CT & ~MASK_T0_MOD | bT0_M0;
-
-    //TMOD &= ~bT0_GATE & ~bT0_CT & ~MASK_T0_MOD;
-    TMOD |= bT0_M0;
-    T2MOD |= bTMR_CLK | bT0_CLK;
-    TF0 = 0;
-    TR0 = 1;
-
-
-    // Configure output pins on port 
-//    P1_DIR_PU = 0x0F;   // TODO: Do we need to enable pullups?
-    P1_MOD_OC = P1_MOD_OC
-                & ~(1<<LED_CLK_PIN)
-                & ~(1<<LED_MOSI_PIN)
-                & ~(1<<LED_LE_PIN)
-                & ~(1<<LED_GCLK_PIN);
-    P1_DIR_PU = P1_DIR_PU
-                | (1<<LED_CLK_PIN)
-                | (1<<LED_MOSI_PIN)
-                | (1<<LED_LE_PIN)
-                | (1<<LED_GCLK_PIN);
-
-    // Note: inputs on port3 do not need to be initialized, since
-    // they are set correctly be default.
-
-    icn2053_begin();
-
-    ledsToLeft = 0;
-    lettersToLeft = 0;
-    ttlLeft = 0;
-
-    ledsToRight = 0;
-    lettersToRight = 0;
-    ttlRight = 0;
-
-    brightness = 255;
-
-    pattern = 0;
-    frame = 0;
-
-    frameReady = false;
-
-    icn2053_setBrightness(brightness);
-
-    // TODO: turn watchdog back on
-//    CH554WDTModeSelect(1);
-}
-
-void main() {
-    bool streamingMode = false;
-
-    uint8_t geometryUpdateTimer = 0;
-    uint8_t outputTimer = 0;
-
-    uint8_t Uart_Timeout = 0;
-    uint8_t length;
-
-    bool button1State = 1;
-    bool button2State = 1;
-
-    initBoard();
-
     // If both buttons are held down, jump to bootloader mode
     if((BUTTON1 == 0) && (BUTTON2 == 0)) {
         EA = 0;
@@ -193,16 +99,63 @@ void main() {
         bootloader();
     }
 
+    CH554WDTModeSelect(1);  // Init watchdog
+
+    mInitSTDIO();           // Init UART0
+
+    UART1Setup();           // Init UART1 and set it to use the alternate pins
+    CH554UART1Alter();
+
+    UART0_buf_init();       // Init UART0 and UART1 circular buffers
+    UART1_buf_init();
+
+    usb_protocol_reset();   // Reset the serial comms protocol
+
+    USBSetup();             // Set up the USB CDC state machine
+
+    SPIMasterModeSet(0);    // Configure SPI for master mode operation
+    animations_initialize();
+
+    systemTickSetup();
+
+    // Note: inputs on port3 do not need to be initialized, since
+    // they are set correctly be default.
+
+    icn2053_begin();
+    icn2053_setBrightness(brightness);
+}
+
+void main() {
+    uint8_t temp;
+
+    bool streamingMode = false;
+
+    uint8_t geometryUpdateTimer = 0;
+    uint8_t outputTimer = 0;
+
+    uint8_t Uart_Timeout = 0;
+
+    bool button1State = 1;
+    bool button2State = 1;
+
+    initBoard();
+
     while (1) {
 
 /// Check buttons
         if((BUTTON1 == 0) && (button1State == 1)) {
             pattern++;
-            if(pattern == PATTERN_COUNT)
+            patternChanged = true;
+
+            if(animations_initialized) {
+                if(pattern >= animations_count)
+                    pattern = 0;
+            }
+            else if(pattern >= PATTERN_COUNT)
                 pattern = 0;
         }
         button1State = BUTTON1;
-       
+
         if((BUTTON2 == 0) && (button2State == 1)) {
             brightness /= 2;
             if(brightness < 1)
@@ -238,21 +191,21 @@ void main() {
 
             if(!UpPoint2_Busy)   //The endpoint is not busy (the first packet of data after idle, only used to trigger upload）
             {
-                length = UartByteCount;
-                if(length>0)
+                temp = UartByteCount;
+                if(temp>0)
                 {
-                    if(length>39 || Uart_Timeout>100)
+                    if(temp>39 || Uart_Timeout>100)
                     {
                         Uart_Timeout = 0;
-                        if(Uart_Output_Point+length>UART_REV_LEN)
-                            length = UART_REV_LEN-Uart_Output_Point;
-                        UartByteCount -= length;
+                        if(Uart_Output_Point+temp>UART_REV_LEN)
+                            temp = UART_REV_LEN-Uart_Output_Point;
+                        UartByteCount -= temp;
                         //Write upload endpoint
-                        memcpy(Ep2Buffer+MAX_PACKET_SIZE,&Receive_Uart_Buf[Uart_Output_Point],length);
-                        Uart_Output_Point+=length;
+                        memcpy(Ep2Buffer+MAX_PACKET_SIZE,&Receive_Uart_Buf[Uart_Output_Point],temp);
+                        Uart_Output_Point+=temp;
                         if(Uart_Output_Point>=UART_REV_LEN)
                             Uart_Output_Point = 0;
-                        UEP2_T_LEN = length;                                        //Pre-use send length must be cleared
+                        UEP2_T_LEN = temp;                                        //Pre-use send length must be cleared
                         UEP2_CTRL = UEP2_CTRL & ~ MASK_UEP_T_RES | UEP_T_RES_ACK;   //Answer ACK
                         UpPoint2_Busy = 1;
                     }
@@ -267,16 +220,32 @@ void main() {
             icn2053_setBrightness(brightness);
         }
 
+        if(patternChanged) {
+            patternChanged = false;
+
+            if(animations_initialized)
+                animations_load(pattern);
+        }
+
         if(frameReady) {
             frameReady = false;
 
             if(!streamingMode) {
                 sendUpdateRight();
 
-                if(pattern == 0)
-                    marchingLetters();
-                else if(pattern == 1)
-                    marchingLeds();
+                if(animations_initialized) {
+                    // Note: We're stomping on the protocol memory here...
+                    animation_getFrame(usb_protocol_payloadData, frame);
+
+                    for(temp = 0; temp < LED_COUNT; temp++)
+                        ledData[streamToPhysical[temp]] = usb_protocol_payloadData[temp];
+                }
+                else {
+                    if(pattern == 0)
+                        marchingLetters();
+                    else if(pattern == 1)
+                        marchingLeds();
+                }
             }
 
             icn2053_updateDisplay(ledData);
@@ -293,10 +262,17 @@ void main() {
             // 8 ticks = ~30fps
             // 4 ticks = ~60fps
             outputTimer++;
-            if((ledsToLeft == 0) && (outputTimer > 3) && !streamingMode) {
+
+            // If we are the master, and enough frames have elapsed, update the frame.
+            if(!streamingMode
+                    && (ledsToLeft == 0)
+                    && (outputTimer > (animations_initialized ? animations_animation.speed : 4))) {
                 outputTimer = 0;
 
                 frame += 1;
+                if((animations_initialized) && (frame >= animations_animation.frameCount))
+                    frame = 0;
+
                 frameReady = true;
             }
 

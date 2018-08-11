@@ -57,20 +57,35 @@ __code uint8_t CfgDesc[] ={
 
 //String descriptor
 unsigned char  __code LangDes[]={0x04,0x03,0x09,0x04};           //Language descriptor
-unsigned char  __code SerDes[]={                                 //Serial number string descriptor
-                                                                 0x14,0x03,
-                                                                 0x32,0x00,0x30,0x00,0x31,0x00,0x37,0x00,0x2D,0x00,
-                                                                 0x32,0x00,0x2D,0x00,
-                                                                 0x32,0x00,0x35,0x00
-                               };
-unsigned char  __code Prod_Des[]={                                //Product string descriptor
-                                                                  0x14,0x03,
-                                                                  0x43,0x00,0x48,0x00,0x35,0x00,0x35,0x00,0x34,0x00,0x5F,0x00,
-                                                                  0x43,0x00,0x44,0x00,0x43,0x00,
-                                 };
+
+//Serial number string descriptor
+// TODO: Use the Chip Unique ID Number
+unsigned char  __code SerDes[]={
+    0x14,0x03,
+    0x32,0x00,0x30,0x00,0x31,0x00,0x37,0x00,0x2D,0x00,
+    0x32,0x00,0x2D,0x00,
+    0x32,0x00,0x35,0x00
+};
+
+// For storing an ASCII representation of the serial number
+unsigned char __xdata SerDes_ID[2+12*2];
+
+//Product string descriptor
+unsigned char  __code Prod_Des[]={
+    28,0x03,
+    'L',0x00,'e',0x00,'o',0x00,'B',0x00,'l',0x00,'i',0x00,'n',0x00,'k',0x00,'y',0x00,'2',0x00,'0',0x00,'1',0x00,'8',0x00
+
+//    0x14,0x03,
+//    0x43,0x00,0x48,0x00,0x35,0x00,0x35,0x00,0x34,0x00,0x5F,0x00,
+//    0x43,0x00,0x44,0x00,0x43,0x00,
+};
+
 unsigned char  __code Manuf_Des[]={
-    0x0A,0x03,
-    0x5F,0x6c,0xCF,0x82,0x81,0x6c,0x52,0x60,
+    24,0x03,
+    'B',0x00,'l',0x00,'i',0x00,'n',0x00,'k',0x00,'i',0x00,'n',0x00,'l',0x00,'a',0x00,'b',0x00,'s',0x00
+
+//    0x0A,0x03,
+//    0x5F,0x6c,0xCF,0x82,0x81,0x6c,0x52,0x60,
 };
 
 
@@ -225,8 +240,10 @@ void DeviceInterrupt(void) __interrupt (INT_NO_USB)                             
                             }
                             else
                             {
-                                pDescr = SerDes;
-                                len = sizeof(SerDes);
+//                                pDescr = SerDes;
+//                                len = sizeof(SerDes);
+                                pDescr = SerDes_ID;
+                                len = sizeof(SerDes_ID);
                             }
                             break;
                         default:
@@ -507,4 +524,41 @@ void DeviceInterrupt(void) __interrupt (INT_NO_USB)                             
         USB_INT_FG = 0xFF;                                                      //Clear interrupt flag
 
     }
+}
+
+__code char nibbleToHex[16] =
+{
+    '0', '1', '2', '3', '4',
+    '5', '6', '7', '8', '9',
+    'A', 'B', 'C', 'D', 'E',
+    'F'
+};
+
+void buildSerialId() {
+    uint8_t i;
+    uint8_t value;
+
+    SerDes_ID[0] = 2+2*12;      // String length
+    SerDes_ID[1] = 3;           // String type
+
+    // TODO: 3FFB should not be used?
+    for(i = 0; i < 6; i++) {
+        value = *((__code uint8_t *)(0x3FFA + i));
+        SerDes_ID[2+i*4+0] = nibbleToHex[(value>>4) & 0x0F]; // top nibble
+        SerDes_ID[2+i*4+1] = 0;
+        SerDes_ID[2+i*4+2] = nibbleToHex[(value>>0) & 0x0F]; // bottom nibble
+        SerDes_ID[2+i*4+3] = 0;
+    }
+}
+
+void USBSetup()
+{
+    USBDeviceCfg();
+    USBDeviceEndPointCfg();                                               //Endpoint configuration
+    USBDeviceIntCfg();                                                    //Interrupt initialization
+    UEP0_T_LEN = 0;
+    UEP1_T_LEN = 0;                                                       //Pre-use send length must be cleared
+    UEP2_T_LEN = 0;                                                       //Pre-use send length must be cleared
+
+    buildSerialId();
 }

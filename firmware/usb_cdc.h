@@ -4,11 +4,13 @@
 #include <ch554_usb.h>
 #include <stdint.h>
 
-extern void USBDeviceCfg();
-extern void USBDeviceIntCfg();
-extern void USBDeviceEndPointCfg();
+void USBSetup();
 
-extern void DeviceInterrupt(void) __interrupt (INT_NO_USB);
+void USBDeviceCfg();
+void USBDeviceIntCfg();
+void USBDeviceEndPointCfg();
+
+void DeviceInterrupt(void) __interrupt (INT_NO_USB);
 
 
 extern uint8_t UsbConfig;
