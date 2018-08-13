@@ -32,8 +32,8 @@ CircularBuffer_t UART0_txBuffer = {
 void UART0_buf_init() {
     ES = 0;
 
-    cbuff_reset(&UART0_rxBuffer);
-    cbuff_reset(&UART0_txBuffer);
+    cbuff_reset(UART0_rxBuffer);
+    cbuff_reset(UART0_txBuffer);
 
     UART0_txActive = false;
 
@@ -94,6 +94,6 @@ bool UART0_buf_write(const uint8_t c) {
 void UART0_buf_reset_rx()
 {
     ES = 0;
-    cbuff_reset(&UART0_rxBuffer);
+    cbuff_reset(UART0_rxBuffer);
     ES = 1;
 }

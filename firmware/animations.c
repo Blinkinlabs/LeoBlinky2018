@@ -8,25 +8,27 @@ __idata uint8_t animations_count;
 __idata struct AnimationHeader animations_animation;
 
 void animations_initialize() {
-    uint32_t magicNumber;
+    uint32_t temp;
 
     animations_initialized = false;
 
     // Test if the magic number is present
     Flash_Read(ANIMATIONS_TABLE_ADDRESS,
                sizeof(uint32_t),
-               (void*) &magicNumber);
+               (void*) &temp);
 
-    if (magicNumber != ANIMATIONS_MAGIC_NUMBER)
+    if (temp != ANIMATIONS_MAGIC_NUMBER)
         return;
 
     // Animation count
     Flash_Read(ANIMATIONS_TABLE_ADDRESS + sizeof(uint32_t),
                sizeof(uint32_t),
-               (uint8_t*) &animations_count);
+               (uint8_t*) &temp);
 
-    if (animations_count > MAX_ANIMATIONS_COUNT)
-        animations_count = MAX_ANIMATIONS_COUNT;
+    if (temp > MAX_ANIMATIONS_COUNT)
+        temp = MAX_ANIMATIONS_COUNT;
+
+    animations_count = temp & 0xFF;
 
     animations_initialized = true;
 

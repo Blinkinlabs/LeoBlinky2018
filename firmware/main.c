@@ -77,7 +77,7 @@ void parsePayload() { //uint16_t dataSize, uint8_t* data) {
 
         case 0x03:  // Reload animations
         {
-//            reloadAnimations = true;
+            animations_initialize();
 
             // send an OK to the pc
             sendByte('!');
@@ -111,6 +111,7 @@ void initBoard() {
 
     usb_protocol_reset();   // Reset the serial comms protocol
 
+
     USBSetup();             // Set up the USB CDC state machine
 
     SPIMasterModeSet(0);    // Configure SPI for master mode operation
@@ -124,6 +125,8 @@ void initBoard() {
     icn2053_begin();
     icn2053_setBrightness(brightness);
 }
+
+
 
 void main() {
     uint8_t temp;

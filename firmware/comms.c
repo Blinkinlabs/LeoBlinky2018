@@ -56,7 +56,7 @@ void receiveLeft() {
     lastRxLeftEventTime = rxLeftEventTime;
 #endif
 
-    c = cbuff_peek(&UART1_rxBuffer);
+    c = cbuff_peek(UART1_rxBuffer);
     bufferSize = cbuff_size(UART1_rxBuffer);
 
     if(c == LEFT_GEOMETRY_HEADER) {
@@ -129,7 +129,7 @@ void receiveRight() {
     lastRxLeftEventTime = rxLeftEventTime;
 #endif
 
-    c = cbuff_peek(&UART0_rxBuffer);
+    c = cbuff_peek(UART0_rxBuffer);
     bufferSize = cbuff_size(UART0_rxBuffer);
 
     if(c == RIGHT_GEOMETRY_HEADER) {

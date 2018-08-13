@@ -35,8 +35,8 @@ typedef struct {
 #define cbuff_size(buff)        (buff.byteCount)
 #define cbuff_empty(buff)       (buff.byteCount == 0)
 #define cbuff_full(buff)        (buff.byteCount == buff.bufferSize)
-void cbuff_reset(CircularBuffer_t *buff);
+#define cbuff_reset(buff)       (buff.readIndex = buff.writeIndex = buff.byteCount = 0)
 
 void cbuff_push(CircularBuffer_t *buff, uint8_t data);
 uint8_t cbuff_pop(CircularBuffer_t *buff);
-uint8_t cbuff_peek(CircularBuffer_t *buff);
+#define cbuff_peek(buff)        (buff.array[buff.readIndex]);
