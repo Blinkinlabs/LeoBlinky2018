@@ -47,8 +47,8 @@ SBIT(LED_GCLK, PORT1_BASE, LED_GCLK_PIN);
 #define BUTTON1_PIN     5   // P3.5
 #define BUTTON2_PIN     3   // P3.3
 
-SBIT(BUTTON1, PORT3_BASE, BUTTON1_PIN);
-SBIT(BUTTON2, PORT3_BASE, BUTTON2_PIN);
+SBIT(BUTTON_STYLE, PORT3_BASE, BUTTON1_PIN);
+SBIT(BUTTON_SHINE, PORT3_BASE, BUTTON2_PIN);
 
 // Need to set one of these
 //#define VARIANT_DIS
@@ -108,6 +108,7 @@ __idata extern uint16_t frame;
 extern bool frameReady;             // If true, the main loop should draw the current frame
 extern bool brightnessChanged;      // If true, the main loop should re-set the brightness
 extern bool patternChanged;         // If true, the main loop should re-load the pattern
+
 
 extern __code const uint8_t streamToPhysical[LED_COUNT];
 

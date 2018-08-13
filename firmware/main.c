@@ -18,11 +18,17 @@
 #include "usb_cdc.h"
 #include "usb_protocol.h"
 
+volatile __idata uint8_t uartByte;
+bool uartByteReady = true;
+
 void sendByte(uint8_t byte) {
-    Receive_Uart_Buf[Uart_Input_Point++] = byte;
-    UartByteCount++;                    //Current buffer remaining bytes to be fetched
-    if(Uart_Input_Point>=UART_REV_LEN)
-        Uart_Input_Point = 0;           //Write pointer
+//    Receive_Uart_Buf[Uart_Input_Point++] = byte;
+//    UartByteCount++;                    //Current buffer remaining bytes to be fetched
+//    if(Uart_Input_Point>=UART_REV_LEN)
+//        Uart_Input_Point = 0;           //Write pointer
+
+    uartByte = byte;
+    uartByteReady = true;
 }
 
 // Handle full messages here
@@ -93,7 +99,7 @@ void initBoard() {
     CfgFsys();
 
     // If both buttons are held down, jump to bootloader mode
-    if((BUTTON1 == 0) && (BUTTON2 == 0)) {
+    if((BUTTON_STYLE == 0) && (BUTTON_SHINE == 0)) {
         EA = 0;
         CH554WDTModeSelect(0);
         bootloader();
@@ -111,7 +117,6 @@ void initBoard() {
 
     usb_protocol_reset();   // Reset the serial comms protocol
 
-
     USBSetup();             // Set up the USB CDC state machine
 
     SPIMasterModeSet(0);    // Configure SPI for master mode operation
@@ -128,25 +133,26 @@ void initBoard() {
 
 
 
+
 void main() {
-    uint8_t temp;
+    static uint8_t temp;
 
-    bool streamingMode = false;
+    static bool streamingMode = false;
 
-    uint8_t geometryUpdateTimer = 0;
-    uint8_t outputTimer = 0;
+    static uint8_t geometryUpdateTimer = 0;
+    static uint8_t outputTimer = 0;
 
-    uint8_t Uart_Timeout = 0;
+//    static uint8_t Uart_Timeout = 0;
 
-    bool button1State = 1;
-    bool button2State = 1;
+    static bool buttonStyleState = 1;
+    static bool buttonShineState = 1;
 
     initBoard();
 
     while (1) {
 
 /// Check buttons
-        if((BUTTON1 == 0) && (button1State == 1)) {
+        if((BUTTON_STYLE == 0) && (buttonStyleState == 1)) {
             pattern++;
             patternChanged = true;
 
@@ -157,15 +163,15 @@ void main() {
             else if(pattern >= PATTERN_COUNT)
                 pattern = 0;
         }
-        button1State = BUTTON1;
+        buttonStyleState = BUTTON_STYLE;
 
-        if((BUTTON2 == 0) && (button2State == 1)) {
+        if((BUTTON_SHINE == 0) && (buttonShineState == 1)) {
             brightness /= 2;
             if(brightness < 1)
                 brightness = 255;
             brightnessChanged = true;
         }
-        button2State = BUTTON2;
+        buttonShineState = BUTTON_SHINE;
 
 // Check UARTS
         receiveLeft();
@@ -189,29 +195,39 @@ void main() {
                     usb_protocol_reset();
                 }
             }
-            if(UartByteCount)
-                Uart_Timeout++;     // Timer for buffering multiple uart rx bytes into a larger USB packet
+//            if(UartByteCount)
+//                Uart_Timeout++;     // Timer for buffering multiple uart rx bytes into a larger USB packet
 
             if(!UpPoint2_Busy)   //The endpoint is not busy (the first packet of data after idle, only used to trigger upload）
             {
-                temp = UartByteCount;
-                if(temp>0)
+//                temp = UartByteCount;
+//                if(temp>0)
+//                {
+//                    if(temp>39 || Uart_Timeout>100)
+//                    {
+//                        Uart_Timeout = 0;
+//                        if(Uart_Output_Point+temp>UART_REV_LEN)
+//                            temp = UART_REV_LEN-Uart_Output_Point;
+//                        UartByteCount -= temp;
+//                        //Write upload endpoint
+//                        memcpy(Ep2Buffer+MAX_PACKET_SIZE,&Receive_Uart_Buf[Uart_Output_Point],temp);
+//                        Uart_Output_Point+=temp;
+//                        if(Uart_Output_Point>=UART_REV_LEN)
+//                            Uart_Output_Point = 0;
+//                        UEP2_T_LEN = temp;                                        //Pre-use send length must be cleared
+//                        UEP2_CTRL = UEP2_CTRL & ~ MASK_UEP_T_RES | UEP_T_RES_ACK;   //Answer ACK
+//                        UpPoint2_Busy = 1;
+//                    }
+//                }
+
+                if(uartByteReady)
                 {
-                    if(temp>39 || Uart_Timeout>100)
-                    {
-                        Uart_Timeout = 0;
-                        if(Uart_Output_Point+temp>UART_REV_LEN)
-                            temp = UART_REV_LEN-Uart_Output_Point;
-                        UartByteCount -= temp;
-                        //Write upload endpoint
-                        memcpy(Ep2Buffer+MAX_PACKET_SIZE,&Receive_Uart_Buf[Uart_Output_Point],temp);
-                        Uart_Output_Point+=temp;
-                        if(Uart_Output_Point>=UART_REV_LEN)
-                            Uart_Output_Point = 0;
-                        UEP2_T_LEN = temp;                                        //Pre-use send length must be cleared
-                        UEP2_CTRL = UEP2_CTRL & ~ MASK_UEP_T_RES | UEP_T_RES_ACK;   //Answer ACK
-                        UpPoint2_Busy = 1;
-                    }
+                    *(Ep2Buffer+MAX_PACKET_SIZE) = uartByte;
+                    uartByteReady = false;
+
+                    UEP2_T_LEN = 1;
+                    UEP2_CTRL = UEP2_CTRL & ~ MASK_UEP_T_RES | UEP_T_RES_ACK;   //Answer ACK
+                    UpPoint2_Busy = 1;
                 }
             }
         }
@@ -237,7 +253,8 @@ void main() {
                 sendUpdateRight();
 
                 if(animations_initialized) {
-                    // Note: We're stomping on the protocol memory here...
+                    // Note: We're stomping on the protocol memory here
+                    // (but it shouldn't be in use at the same time anyway)
                     animation_getFrame(usb_protocol_payloadData, frame);
 
                     for(temp = 0; temp < LED_COUNT; temp++)

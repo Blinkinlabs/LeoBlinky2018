@@ -19,6 +19,8 @@ bool frameReady = false;
 bool brightnessChanged = false;
 bool patternChanged = false;
 
+
+
 // Map from pattern stream to LED
 // Note the map is defined by column- this is to make it easier to index into a
 // pattern, for a specific badge
@@ -37,13 +39,14 @@ __code const uint8_t streamToPhysical[LED_COUNT] = {
 #elif defined(VARIANT_ENT)
 
 __code const uint8_t streamToPhysical[LED_COUNT] = {
-    0, 14,
-    1, 13,
-    2, 12,
-    3, 11,
-    4, 10,
-    5,  9,
-    6,  8,
+    0, 15,
+    1, 14,
+    2, 13,
+    3, 12,
+    4, 11,
+    5, 10,
+    6,  9,
+    8,  7,
    16, 17,
 };
 

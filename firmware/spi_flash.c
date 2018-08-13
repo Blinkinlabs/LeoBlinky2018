@@ -48,11 +48,11 @@ void Flash_EraseChip()
 void Flash_Read(uint32_t address, uint32_t length, uint8_t *flashData)
 {
     SPIMasterAssertCS();
-        CH554SPIMasterWrite(CMD_ARRAYREAD);
+        CH554SPIMasterWrite(CMD_READDATA);
         CH554SPIMasterWrite(*((uint8_t*)&(address) + 2));    // addr[23:16]
         CH554SPIMasterWrite(*((uint8_t*)&(address) + 1));    // addr[15:8]
         CH554SPIMasterWrite(*((uint8_t*)&(address) + 0));    // addr[7:0]
-        CH554SPIMasterWrite(0x00);              // Wait states
+//        CH554SPIMasterWrite(0x00);              // Wait states
         for(;length > 0; length--) {
             *flashData = CH554SPIMasterRead();
             flashData++;

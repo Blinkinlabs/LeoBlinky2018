@@ -58,17 +58,16 @@ __code uint8_t CfgDesc[] ={
 //String descriptor
 unsigned char  __code LangDes[]={0x04,0x03,0x09,0x04};           //Language descriptor
 
-//Serial number string descriptor
-// TODO: Use the Chip Unique ID Number
-unsigned char  __code SerDes[]={
-    0x14,0x03,
-    0x32,0x00,0x30,0x00,0x31,0x00,0x37,0x00,0x2D,0x00,
-    0x32,0x00,0x2D,0x00,
-    0x32,0x00,0x35,0x00
-};
+////Serial number string descriptor
+//unsigned char  __code SerDes[]={
+//    0x14,0x03,
+//    0x32,0x00,0x30,0x00,0x31,0x00,0x37,0x00,0x2D,0x00,
+//    0x32,0x00,0x2D,0x00,
+//    0x32,0x00,0x35,0x00
+//};
 
 // For storing an ASCII representation of the serial number
-unsigned char __xdata SerDes_ID[2+12*2];
+unsigned char __xdata SerDes_ID[2+12*2+8];
 
 //Product string descriptor
 unsigned char  __code Prod_Des[]={
@@ -492,9 +491,7 @@ void DeviceInterrupt(void) __interrupt (INT_NO_USB)                             
         UIF_SUSPEND = 0;
         UIF_TRANSFER = 0;
         UIF_BUS_RST = 0;                                                                //Clear interrupt flag
-        Uart_Input_Point = 0;   //Circular buffer input pointer
-        Uart_Output_Point = 0;  //Circular buffer read pointer
-        UartByteCount = 0;      //Current buffer remaining bytes to be fetched
+        Reset_Uart1();
         USBByteCount = 0;       //Length received by the USB endpoint
         UsbConfig = 0;          //Clear configuration value
         UpPoint2_Busy = 0;
@@ -538,8 +535,8 @@ void buildSerialId() {
     uint8_t i;
     uint8_t value;
 
-    SerDes_ID[0] = 2+2*12;      // String length
-    SerDes_ID[1] = 3;           // String type
+    SerDes_ID[0] = sizeof(SerDes_ID);      // String length
+    SerDes_ID[1] = 3;                      // String type
 
     // TODO: 3FFB should not be used?
     for(i = 0; i < 6; i++) {
@@ -549,6 +546,31 @@ void buildSerialId() {
         SerDes_ID[2+i*4+2] = nibbleToHex[(value>>0) & 0x0F]; // bottom nibble
         SerDes_ID[2+i*4+3] = 0;
     }
+    SerDes_ID[26] = '-';
+    SerDes_ID[27] = 0x00;
+
+#if defined(VARIANT_DIS)
+    SerDes_ID[28] = 'D';
+    SerDes_ID[29] = 0x00;
+    SerDes_ID[30] = 'I';
+    SerDes_ID[31] = 0x00;
+    SerDes_ID[32] = 'S';
+    SerDes_ID[33] = 0x00;
+#elif defined(VARIANT_ORI)
+    SerDes_ID[28] = 'O';
+    SerDes_ID[29] = 0x00;
+    SerDes_ID[30] = 'R';
+    SerDes_ID[31] = 0x00;
+    SerDes_ID[32] = 'I';
+    SerDes_ID[33] = 0x00;
+#elif defined(VARIANT_ENT)
+    SerDes_ID[28] = 'E';
+    SerDes_ID[29] = 0x00;
+    SerDes_ID[30] = 'N';
+    SerDes_ID[31] = 0x00;
+    SerDes_ID[32] = 'T';
+    SerDes_ID[33] = 0x00;
+#endif
 }
 
 void USBSetup()

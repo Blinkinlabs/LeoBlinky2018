@@ -7,10 +7,12 @@
 
 #include "uart.h"
 
+#if 0
 __idata uint8_t Receive_Uart_Buf[UART_REV_LEN];   //Serial receive buffer
 volatile __idata uint8_t Uart_Input_Point = 0;   //The circular buffer write pointer, the bus reset needs to be initialized to 0
 volatile __idata uint8_t Uart_Output_Point = 0;  //The circular buffer fetches the pointer, and the bus reset needs to be initialized to 0.
 volatile __idata uint8_t UartByteCount = 0;      //Current buffer remaining bytes to be fetched
+#endif
 
 /*******************************************************************************
 * Function Name  : Config_Uart1(uint8_t *cfg_uart)
@@ -50,3 +52,12 @@ void Uart1_ISR(void) __interrupt (INT_NO_UART1)
 
 }
 #endif
+
+void Reset_Uart1()
+{
+#if 0
+    Uart_Input_Point = 0;   //Circular buffer input pointer
+    Uart_Output_Point = 0;  //Circular buffer read pointer
+    UartByteCount = 0;      //Current buffer remaining bytes to be fetched
+#endif
+}

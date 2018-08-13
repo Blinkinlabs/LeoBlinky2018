@@ -16,7 +16,8 @@ void Flash_Write(uint32_t address, uint32_t length, uint8_t * flashData);
 #define CMD_WRITE_ENABLE            (0x06)
 #define CMD_WRITE_DISABLE           (0x04)
 
-#define CMD_ARRAYREAD               (0x0B)
+#define CMD_READDATA                (0x03)
+#define CMD_READDATA_FAST           (0x0B)
 #define CMD_PAGEPROGRAM             (0x02)
 
 #define CMD_CHIP_ERASE              (0x60)

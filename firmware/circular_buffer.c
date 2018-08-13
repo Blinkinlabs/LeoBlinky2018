@@ -1,34 +1,29 @@
 #include "circular_buffer.h"
 
 
-void cbuff_push(CircularBuffer_t *buff, uint8_t data)
-{
-//    Receive_Uart_Buf[Uart_Input_Point++] = byte;
-//    UartByteCount++;                    //Current buffer remaining bytes to be fetched
-//    if(Uart_Input_Point>=UART_REV_LEN)
-//        Uart_Input_Point = 0;           //Write pointer
+//void cbuff_push(CircularBuffer_t *buff, uint8_t data)
+//{
+//    buff->array[buff->writeIndex++] = data;
 
-    buff->array[buff->writeIndex++] = data;
+//    if(buff->writeIndex >= buff->bufferSize)
+//        buff->writeIndex = 0;
 
-    if(buff->writeIndex >= buff->bufferSize)
-        buff->writeIndex = 0;
+//    buff->byteCount++;
+//}
 
-    buff->byteCount++;
-}
+//uint8_t cbuff_pop(CircularBuffer_t *buff)
+//{
+//    uint8_t data;
 
-uint8_t cbuff_pop(CircularBuffer_t *buff)
-{
-    uint8_t data;
+//    data = buff->array[buff->readIndex++];
 
-    data = buff->array[buff->readIndex++];
+//    if(buff->readIndex >= buff->bufferSize)
+//        buff->readIndex = 0;
 
-    if(buff->readIndex >= buff->bufferSize)
-        buff->readIndex = 0;
+//    buff->byteCount--;
 
-    buff->byteCount--;
-
-    return data;
-}
+//    return data;
+//}
 
 //uint8_t cbuff_peek(CircularBuffer_t *buff)
 //{

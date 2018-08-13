@@ -41,23 +41,20 @@ void UART1_buf_init() {
 }
 
 void UART1_ISR(void) __interrupt (INT_NO_UART1) {
-    BUTTON2 = 0;
-
     if(U1RI) {
         if(!cbuff_full(UART1_rxBuffer))
-            cbuff_push(&UART1_rxBuffer, SBUF1);
+            cbuff_push(UART1_rxBuffer, SBUF1);
         U1RI = 0;
     }
 
     if(U1TI) {
         U1TI = 0;
-        if(!cbuff_empty(UART1_txBuffer))
-            SBUF1 = cbuff_pop(&UART1_txBuffer);
+        if(!cbuff_empty(UART1_txBuffer)) {
+            cbuff_pop(UART1_txBuffer, SBUF1);
+        }
         else
             UART1_txActive = false;
     }
-
-    BUTTON2 = 1;
 }
 
 bool UART1_buf_read(uint8_t *c) {
@@ -65,7 +62,7 @@ bool UART1_buf_read(uint8_t *c) {
         return false;
 
     IE_UART1 = 0;
-    *c = cbuff_pop(&UART1_rxBuffer);
+    cbuff_pop(UART1_rxBuffer, *c);
     IE_UART1 = 1;
 
     return true;
@@ -78,7 +75,7 @@ bool UART1_buf_write(const uint8_t c) {
 	        return false;
 
         IE_UART1 = 0;
-        cbuff_push(&UART1_txBuffer, c);
+        cbuff_push(UART1_txBuffer, c);
         IE_UART1 = 1;
     }
     // otherwise send it directly

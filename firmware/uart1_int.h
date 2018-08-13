@@ -5,14 +5,14 @@
 #include <stdbool.h>
 #include "circular_buffer.h"
 
-// Length of the RX buffer. Must be a multiple of 2
+// Length of the RX buffer
 #ifndef UART1_RX_LEN
-#define UART1_RX_LEN 8
+#define UART1_RX_LEN 8          // Can receive sendGeometryRight() and sendUpdateRight()
 #endif
 
-// Length of the TX buffer. Must be a multiple of 2
+// Length of the TX buffer
 #ifndef UART1_TX_LEN
-#define UART1_TX_LEN 4
+#define UART1_TX_LEN 2          // only sends sendGeometryLeft() messages
 #endif
 
 // Initialize the circular buffer. Assumes that the

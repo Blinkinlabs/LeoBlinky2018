@@ -7,8 +7,8 @@ __xdata uint16_t usb_protocol_payloadLength;                ///< Number of bytes
 __xdata uint8_t m_crc;                                      ///< CRC calculated for this packet
 
 
-// add a new byte to the CRC
-void updateCRC(uint8_t data);
+//// add a new byte to the CRC
+//void updateCRC(uint8_t data);
 
 // store a new byte in the packet
 void addByte(uint8_t data);
@@ -16,23 +16,23 @@ void addByte(uint8_t data);
 void addByte(uint8_t data) {
     usb_protocol_payloadData[usb_protocol_payloadLength++] = data;
 
-    updateCRC(data);
+//    updateCRC(data);
 }
 
-void updateCRC(uint8_t data) {
-    uint8_t i;
+//void updateCRC(uint8_t data) {
+//    uint8_t i;
 
-    m_crc = m_crc ^ data;
-    for (i = 0; i < 8; i++)
-    {
-        if(m_crc & 0x01) {
-            m_crc = (m_crc >> 1) ^ 0x8C;
-        }
-        else {
-            m_crc >>= 1;
-        }
-    }
-}
+//    m_crc = m_crc ^ data;
+//    for (i = 0; i < 8; i++)
+//    {
+//        if(m_crc & 0x01) {
+//            m_crc = (m_crc >> 1) ^ 0x8C;
+//        }
+//        else {
+//            m_crc >>= 1;
+//        }
+//    }
+//}
 
 void usb_protocol_reset() {
     m_crc = 0;
@@ -47,13 +47,13 @@ bool usb_protocol_parseByte(uint8_t data) {
         if(data == HEADER0) {
             usb_protocol_reset();
             m_mode = MODE_HEADER1;
-            updateCRC(data);
+//            updateCRC(data);
         }
         break;
     case MODE_HEADER1:
         if(data == HEADER1) {
             m_mode = MODE_LENGTH0;
-            updateCRC(data);
+//            updateCRC(data);
         }
         else
             usb_protocol_reset();
@@ -61,12 +61,12 @@ bool usb_protocol_parseByte(uint8_t data) {
     case MODE_LENGTH0:
         m_mode = MODE_LENGTH1;
         m_expectedLength = data << 8;
-        updateCRC(data);
+//        updateCRC(data);
         break;
     case MODE_LENGTH1:
         m_mode = MODE_PAYLOAD;
         m_expectedLength |= data;
-        updateCRC(data);
+//        updateCRC(data);
         if (m_expectedLength >= MAX_DATA_LENGTH)
             usb_protocol_reset();
         break;
