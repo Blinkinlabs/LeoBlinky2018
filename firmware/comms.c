@@ -27,7 +27,7 @@ void sendGeometryRight() {
     UART0_buf_write(LEFT_GEOMETRY_HEADER);
     UART0_buf_write(ledsToLeft + LED_COUNT);
     UART0_buf_write(lettersToLeft + LETTER_COUNT);
-    UART0_buf_write(brightness);
+    UART0_buf_write(brightnessIndex);
 }
 
 void sendUpdateRight() {
@@ -73,8 +73,8 @@ void receiveLeft() {
 //            c = cbuff_pop(UART1_rxBuffer);
 //            IE_UART1 = 1;
 
-            if(c != brightness) {
-                brightness = c;
+            if(c != brightnessIndex) {
+                brightnessIndex = c;
                 brightnessChanged = true;
             }
 

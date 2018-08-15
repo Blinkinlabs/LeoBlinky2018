@@ -1,10 +1,10 @@
 #include "usb_protocol.h"
 
-__xdata uint16_t m_expectedLength;                          ///< Number of bytes expected in the current packet
-__xdata uint8_t m_mode;                                     ///< Current operational mode
+uint16_t m_expectedLength;                          ///< Number of bytes expected in the current packet
+uint8_t m_mode;                                     ///< Current operational mode
 __xdata uint8_t usb_protocol_payloadData[MAX_DATA_LENGTH];  ///< Data received in this packet
-__xdata uint16_t usb_protocol_payloadLength;                ///< Number of bytes received for this packet
-__xdata uint8_t m_crc;                                      ///< CRC calculated for this packet
+uint16_t usb_protocol_payloadLength;                ///< Number of bytes received for this packet
+//uint8_t m_crc;                                      ///< CRC calculated for this packet
 
 
 //// add a new byte to the CRC
@@ -35,7 +35,7 @@ void addByte(uint8_t data) {
 //}
 
 void usb_protocol_reset() {
-    m_crc = 0;
+//    m_crc = 0;
     usb_protocol_payloadLength = 0;
     m_mode = MODE_HEADER0;
 }

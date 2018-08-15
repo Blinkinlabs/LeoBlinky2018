@@ -2,8 +2,6 @@
 
 #include <ch554.h>
 #include <stdint.h>
-#include <stdbool.h>
-
 
 // Peripheral usage:
 //
@@ -92,22 +90,22 @@ SBIT(BUTTON_SHINE, PORT3_BASE, BUTTON2_PIN);
 
 __xdata extern uint8_t ledData[LED_PHYSICAL_CHANNELS];
 
-__idata extern uint8_t ledsToLeft;
-__idata extern uint8_t lettersToLeft;
-__idata extern uint8_t ttlLeft;
+extern uint8_t ledsToLeft;
+extern uint8_t lettersToLeft;
+extern uint8_t ttlLeft;
 
-__idata extern uint8_t ledsToRight;
-__idata extern uint8_t lettersToRight;
-__idata extern uint8_t ttlRight;
+extern uint8_t ledsToRight;
+extern uint8_t lettersToRight;
+extern uint8_t ttlRight;
 
-__idata extern uint8_t brightness;
+extern uint8_t brightnessIndex;
 
-__idata extern uint8_t pattern;
-__idata extern uint16_t frame;
+extern uint8_t pattern;
+extern uint16_t frame;
 
-extern bool frameReady;             // If true, the main loop should draw the current frame
-extern bool brightnessChanged;      // If true, the main loop should re-set the brightness
-extern bool patternChanged;         // If true, the main loop should re-load the pattern
+extern __bit frameReady;             // If true, the main loop should draw the current frame
+extern __bit brightnessChanged;      // If true, the main loop should re-set the brightness
+extern __bit patternChanged;         // If true, the main loop should re-load the pattern
 
 
 extern __code const uint8_t streamToPhysical[LED_COUNT];

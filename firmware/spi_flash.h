@@ -7,8 +7,18 @@ void Flash_ReadJEDECID();
 
 void Flash_EraseChip();
 
-void Flash_Read(uint32_t address, uint32_t length, uint8_t * flashData);
-void Flash_Write(uint32_t address, uint32_t length, uint8_t * flashData);
+typedef struct {
+    uint32_t address;
+    uint32_t length;
+    uint8_t* data;
+} FlashConfig_t;
+
+extern FlashConfig_t flash_config;
+
+//void flash_read(uint32_t address, uint8_t length, uint8_t * flashData);
+//void flash_write(uint32_t address, uint8_t length, uint8_t * flashData);
+void flash_read();
+void flash_write();
 
 #define CMD_READJEDECID             (0x9F)
 #define CMD_READSTATUSREGISTER      (0x05)

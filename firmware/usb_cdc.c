@@ -25,9 +25,9 @@ USB_SETUP_REQ   SetupReqBuf;                                                   /
 __xdata uint8_t LineCoding[7]={0x00,0xe1,0x00,0x00,0x00,0x00,0x08};   // Initial baud rate is 57600, 1 stop bit, no parity, 8 data bits.
 
 
-volatile __idata uint8_t USBByteCount = 0;      //Data received on behalf of the USB endpoint
-volatile __idata uint8_t USBBufOutPoint = 0;    //Data pointer
-volatile __idata uint8_t UpPoint2_Busy  = 0;   //Upload endpoint is busy flag
+volatile uint8_t USBByteCount = 0;      //Data received on behalf of the USB endpoint
+volatile uint8_t USBBufOutPoint = 0;    //Data pointer
+volatile uint8_t UpPoint2_Busy  = 0;   //Upload endpoint is busy flag
 
 
 
@@ -39,6 +39,7 @@ __code uint8_t DevDesc[] = {0x12,0x01,0x10,0x01,0x02,0x00,0x00,DEFAULT_ENDP0_SIZ
                             0x00,0x01,0x01,0x02,
                             0x03,0x01
                            };
+
 __code uint8_t CfgDesc[] ={
     0x09,0x02,0x43,0x00,0x02,0x01,0x00,0xa0,0x32,             //Configuration descriptor (two interfaces)
     //The following is the interface 0 (CDC interface) descriptor
@@ -56,10 +57,15 @@ __code uint8_t CfgDesc[] ={
 };
 
 //String descriptor
-unsigned char  __code LangDes[]={0x04,0x03,0x09,0x04};           //Language descriptor
+
+//Language descriptor
+__code unsigned char LangDes[]={
+    sizeof(LangDes),0x03,
+    0x09,0x01       // English (US)
+};
 
 ////Serial number string descriptor
-//unsigned char  __code SerDes[]={
+//__code unsigned char SerDes[]={
 //    0x14,0x03,
 //    0x32,0x00,0x30,0x00,0x31,0x00,0x37,0x00,0x2D,0x00,
 //    0x32,0x00,0x2D,0x00,
@@ -67,24 +73,39 @@ unsigned char  __code LangDes[]={0x04,0x03,0x09,0x04};           //Language desc
 //};
 
 // For storing an ASCII representation of the serial number
-unsigned char __xdata SerDes_ID[2+12*2+8];
+__xdata unsigned char SerDes_ID[2+12*2+8];
 
 //Product string descriptor
-unsigned char  __code Prod_Des[]={
-    28,0x03,
-    'L',0x00,'e',0x00,'o',0x00,'B',0x00,'l',0x00,'i',0x00,'n',0x00,'k',0x00,'y',0x00,'2',0x00,'0',0x00,'1',0x00,'8',0x00
-
-//    0x14,0x03,
-//    0x43,0x00,0x48,0x00,0x35,0x00,0x35,0x00,0x34,0x00,0x5F,0x00,
-//    0x43,0x00,0x44,0x00,0x43,0x00,
+__code unsigned char Prod_Des[]={
+    sizeof(Prod_Des),0x03,
+    'L',0x00,
+    'e',0x00,
+    'o',0x00,
+    'B',0x00,
+    'l',0x00,
+    'i',0x00,
+    'n',0x00,
+    'k',0x00,
+    'y',0x00,
+    '2',0x00,
+    '0',0x00,
+    '1',0x00,
+    '8',0x00
 };
 
-unsigned char  __code Manuf_Des[]={
-    24,0x03,
-    'B',0x00,'l',0x00,'i',0x00,'n',0x00,'k',0x00,'i',0x00,'n',0x00,'l',0x00,'a',0x00,'b',0x00,'s',0x00
-
-//    0x0A,0x03,
-//    0x5F,0x6c,0xCF,0x82,0x81,0x6c,0x52,0x60,
+__code unsigned char Manuf_Des[]={
+    sizeof(Manuf_Des),0x03,
+    'B',0x00,
+    'l',0x00,
+    'i',0x00,
+    'n',0x00,
+    'k',0x00,
+    'i',0x00,
+    'n',0x00,
+    'l',0x00,
+    'a',0x00,
+    'b',0x00,
+    's',0x00
 };
 
 
@@ -575,9 +596,9 @@ void buildSerialId() {
 
 void USBSetup()
 {
-    USBDeviceCfg();
-    USBDeviceEndPointCfg();                                               //Endpoint configuration
-    USBDeviceIntCfg();                                                    //Interrupt initialization
+//    USBDeviceCfg();
+//    USBDeviceEndPointCfg();                                               //Endpoint configuration
+//    USBDeviceIntCfg();                                                    //Interrupt initialization
     UEP0_T_LEN = 0;
     UEP1_T_LEN = 0;                                                       //Pre-use send length must be cleared
     UEP2_T_LEN = 0;                                                       //Pre-use send length must be cleared

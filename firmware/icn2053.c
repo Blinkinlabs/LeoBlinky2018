@@ -3,6 +3,8 @@
 #include "icn2053.h"
 #include "leoblinky2018.h"
 
+#include "brightness_table.h"
+
 #define REG1_OPEN_DET       0x4000          // LED open detect (0=disable, 1=enable)
 #define REG1_ACC_RATEA      0x2000          // Accerate Rate (accelerate fix 9 rate, send 138 GCLKS eachline: set to 0)
 #define REG1_SCAN_LINE(x)   ((x&0x1F)<<8)   // Number of scan lines (0=1 scan line, ... 31=32 scan lines) (5 bits)
@@ -197,7 +199,7 @@ void icn2053_updateDisplay(uint8_t* ledData) {
 
     for(led = 15; led !=255; led--) {
         for(chip = ICN2053_COUNT; chip != 255; chip--) {
-            expandedData = ledData[chip*16 + led] << 8;
+            expandedData = brightnessTable[ledData[chip*16 + led]];
 
             if(chip != 0)
                 sendLatchedData(expandedData, 0);

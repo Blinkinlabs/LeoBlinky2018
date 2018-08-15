@@ -16,9 +16,9 @@ void DeviceInterrupt(void) __interrupt (INT_NO_USB);
 extern uint8_t UsbConfig;
 
 
-extern volatile __idata uint8_t USBByteCount;
-extern volatile __idata uint8_t USBBufOutPoint;
-extern volatile __idata uint8_t UpPoint2_Busy;
+extern volatile uint8_t USBByteCount;
+extern volatile uint8_t USBBufOutPoint;
+extern volatile uint8_t UpPoint2_Busy;
 
 
 __xdata __at (0x0000) uint8_t  Ep0Buffer[DEFAULT_ENDP0_SIZE];       //Endpoint 0 OUT&IN buffer, must be an even address

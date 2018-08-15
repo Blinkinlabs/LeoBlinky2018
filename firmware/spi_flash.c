@@ -6,6 +6,8 @@
 #include "spi_flash.h"
 #include "leoblinky2018.h"
 
+FlashConfig_t flash_config;
+
 uint8_t Flash_ReadStatusRegister()
 {
     uint8_t status;
@@ -45,22 +47,24 @@ void Flash_EraseChip()
     }
 }
 
-void Flash_Read(uint32_t address, uint32_t length, uint8_t *flashData)
+//void flash_read(uint32_t address, uint32_t length, uint8_t *flashData)
+void flash_read()
 {
     SPIMasterAssertCS();
         CH554SPIMasterWrite(CMD_READDATA);
-        CH554SPIMasterWrite(*((uint8_t*)&(address) + 2));    // addr[23:16]
-        CH554SPIMasterWrite(*((uint8_t*)&(address) + 1));    // addr[15:8]
-        CH554SPIMasterWrite(*((uint8_t*)&(address) + 0));    // addr[7:0]
+        CH554SPIMasterWrite(*((uint8_t*)&(flash_config.address) + 2));    // addr[23:16]
+        CH554SPIMasterWrite(*((uint8_t*)&(flash_config.address) + 1));    // addr[15:8]
+        CH554SPIMasterWrite(*((uint8_t*)&(flash_config.address) + 0));    // addr[7:0]
 //        CH554SPIMasterWrite(0x00);              // Wait states
-        for(;length > 0; length--) {
-            *flashData = CH554SPIMasterRead();
-            flashData++;
+        for(;flash_config.length > 0; flash_config.length--) {
+            *flash_config.data = CH554SPIMasterRead();
+            flash_config.data++;
         }
     SPIMasterDeassertCS();
 }
 
-void Flash_Write(uint32_t address, uint32_t length, uint8_t *flashData)
+//void flash_write(uint32_t address, uint32_t length, uint8_t *flashData)
+void flash_write()
 {
     SPIMasterAssertCS();
         CH554SPIMasterWrite(CMD_WRITE_ENABLE);
@@ -68,12 +72,12 @@ void Flash_Write(uint32_t address, uint32_t length, uint8_t *flashData)
 
     SPIMasterAssertCS();
         CH554SPIMasterWrite(CMD_PAGEPROGRAM);
-        CH554SPIMasterWrite(*((uint8_t*)&(address) + 2));    // addr[23:16]
-        CH554SPIMasterWrite(*((uint8_t*)&(address) + 1));    // addr[15:8]
-        CH554SPIMasterWrite(*((uint8_t*)&(address) + 0));    // addr[7:0]
-        for(;length > 0; length--) {
-            CH554SPIMasterWrite(*flashData);
-            flashData++;
+        CH554SPIMasterWrite(*((uint8_t*)&(flash_config.address) + 2));    // addr[23:16]
+        CH554SPIMasterWrite(*((uint8_t*)&(flash_config.address) + 1));    // addr[15:8]
+        CH554SPIMasterWrite(*((uint8_t*)&(flash_config.address) + 0));    // addr[7:0]
+        for(;flash_config.length > 0; flash_config.length--) {
+            CH554SPIMasterWrite(*flash_config.data);
+            flash_config.data++;
         }
     SPIMasterDeassertCS();
 

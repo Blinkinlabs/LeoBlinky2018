@@ -24,3 +24,5 @@ usb_protocol.h
 usb_protocol.c
 animations.h
 animations.c
+brightness_table.h
+make_brightness_table.py

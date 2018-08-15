@@ -15,12 +15,12 @@ TARGET= LeoBlinky2018-$(variant)
 XRAM_SIZE = 0x0300
 XRAM_LOC = 0x0100
 
-CH554_SDCC= c:/Users/blinkinlabs/Blinkinlabs-Repos/ch554_sdcc
+CH554_SDCC= c:/Users/matt/Blinkinlabs-Repos/ch554_sdcc
 
 EXTRA_FLAGS="-DUART0_BAUD=57600" \
             "-DUART1_BAUD=57600"
 
-EXTRA_FLAGS+="-DVARIANT_$(variant)"
+EXTRA_FLAGS+="-DVARIANT_$(variant) -Werror"
 
 C_FILES= \
 	main.c \

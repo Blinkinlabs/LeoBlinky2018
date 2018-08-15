@@ -1,11 +1,15 @@
 #ifndef UART_H
 #define UART_H
 
+#define Config_Uart1(cfg_uart) {}
+#define Reset_Uart1() {}
+
+#if 0
 void Config_Uart1(uint8_t *cfg_uart);
 
 void Reset_Uart1();
 
-#if 0
+
 extern void Uart1_ISR(void) __interrupt (INT_NO_UART1);
 
 #define UART_REV_LEN  2                 // Serial receive buffer size

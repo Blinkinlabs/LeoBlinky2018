@@ -18,8 +18,19 @@
 #include "usb_cdc.h"
 #include "usb_protocol.h"
 
-volatile __idata uint8_t uartByte;
-bool uartByteReady = true;
+uint8_t uartByte;
+__bit uartByteReady = false;
+
+__code uint8_t brightnessSteps[] = {
+    73,
+    255,
+    73,
+    21,
+    6,
+    2,
+    6,
+    21,
+};
 
 void sendByte(uint8_t byte) {
 //    Receive_Uart_Buf[Uart_Input_Point++] = byte;
@@ -33,16 +44,20 @@ void sendByte(uint8_t byte) {
 
 // Handle full messages here
 void parsePayload() { //uint16_t dataSize, uint8_t* data) {
-    uint32_t address;
+//    uint32_t address;
     uint8_t i;
 
     switch(usb_protocol_payloadData[0]) {
         case 0x00:  // Display some data on the LEDs
         {
-            if(usb_protocol_payloadLength < 1 + LED_COUNT)
-                return;
-            for(i = 0; i < LED_COUNT; i++)
-                ledData[streamToPhysical[i]] = usb_protocol_payloadData[i+1];
+            // Note: i counts backwards, and skips 0, so it should be set to the number
+            // of LED bytes to copy. Example range: [14 13 12 11 10 9 8 7 6 5 4 3 2 1]
+            i = usb_protocol_payloadLength;
+            if(i > LED_COUNT)
+                i = LED_COUNT;
+
+            for(; i > 0; i--)
+                ledData[streamToPhysical[i-1]] = usb_protocol_payloadData[i];
 
             frameReady = true;
         }
@@ -64,17 +79,20 @@ void parsePayload() { //uint16_t dataSize, uint8_t* data) {
                 return;
             }
 
-            address = usb_protocol_payloadData[1];
-            address = address << 8;
-            address |= usb_protocol_payloadData[2];
-            address = address << 8;
-            address |= usb_protocol_payloadData[3];
-            address = address << 8;
-            address |= usb_protocol_payloadData[4];
+            flash_config.address = usb_protocol_payloadData[1];
+            flash_config.address = flash_config.address << 8;
+            flash_config.address |= usb_protocol_payloadData[2];
+            flash_config.address = flash_config.address << 8;
+            flash_config.address |= usb_protocol_payloadData[3];
+            flash_config.address = flash_config.address << 8;
+            flash_config.address |= usb_protocol_payloadData[4];
 
-            Flash_Write(address,
-                        FLASH_PAGESIZE,
-                        &usb_protocol_payloadData[5]);
+//            flash_write(address,
+//                        FLASH_PAGESIZE,
+//                        &usb_protocol_payloadData[5]);
+            flash_config.length = FLASH_PAGESIZE;
+            flash_config.data = &usb_protocol_payloadData[5];
+            flash_write();
 
             // send an OK to the pc
             sendByte('!');
@@ -128,7 +146,7 @@ void initBoard() {
     // they are set correctly be default.
 
     icn2053_begin();
-    icn2053_setBrightness(brightness);
+    icn2053_setBrightness(brightnessSteps[brightnessIndex]);
 }
 
 
@@ -137,15 +155,15 @@ void initBoard() {
 void main() {
     static uint8_t temp;
 
-    static bool streamingMode = false;
+    static __bit streamingMode = false;
 
     static uint8_t geometryUpdateTimer = 0;
     static uint8_t outputTimer = 0;
 
 //    static uint8_t Uart_Timeout = 0;
 
-    static bool buttonStyleState = 1;
-    static bool buttonShineState = 1;
+    static __bit buttonStyleState = 1;
+    static __bit buttonShineState = 1;
 
     initBoard();
 
@@ -166,10 +184,11 @@ void main() {
         buttonStyleState = BUTTON_STYLE;
 
         if((BUTTON_SHINE == 0) && (buttonShineState == 1)) {
-            brightness /= 2;
-            if(brightness < 1)
-                brightness = 255;
+            brightnessIndex++;
             brightnessChanged = true;
+
+            if(brightnessIndex >= sizeof(brightnessSteps))
+                brightnessIndex = 0;
         }
         buttonShineState = BUTTON_SHINE;
 
@@ -236,7 +255,7 @@ void main() {
 // Handle system changes
         if(brightnessChanged) {
             brightnessChanged = false;
-            icn2053_setBrightness(brightness);
+            icn2053_setBrightness(brightnessSteps[brightnessIndex]);
         }
 
         if(patternChanged) {
@@ -255,7 +274,7 @@ void main() {
                 if(animations_initialized) {
                     // Note: We're stomping on the protocol memory here
                     // (but it shouldn't be in use at the same time anyway)
-                    animation_getFrame(usb_protocol_payloadData, frame);
+                    animation_getFrame(frame, usb_protocol_payloadData);
 
                     for(temp = 0; temp < LED_COUNT; temp++)
                         ledData[streamToPhysical[temp]] = usb_protocol_payloadData[temp];
@@ -286,7 +305,7 @@ void main() {
             // If we are the master, and enough frames have elapsed, update the frame.
             if(!streamingMode
                     && (ledsToLeft == 0)
-                    && (outputTimer > (animations_initialized ? animations_animation.speed : 4))) {
+                    && (outputTimer > (animations_initialized ? animations_animation.delay : 4))) {
                 outputTimer = 0;
 
                 frame += 1;

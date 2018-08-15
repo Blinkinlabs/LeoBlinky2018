@@ -57,6 +57,6 @@ bool usb_protocol_parseByte(uint8_t data);
 bool usb_protocol_payloadReady();
 
 extern __xdata uint8_t usb_protocol_payloadData[MAX_DATA_LENGTH];    ///< Data received in this packet
-extern __xdata uint16_t usb_protocol_payloadLength;                  ///< Number of bytes received for this packet
+extern uint16_t usb_protocol_payloadLength;                  ///< Number of bytes received for this packet
 
 #endif

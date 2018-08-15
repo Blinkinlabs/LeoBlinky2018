@@ -1,23 +1,25 @@
 #include "leoblinky2018.h"
 
+#include <stdbool.h>
+
 __xdata uint8_t ledData[LED_PHYSICAL_CHANNELS];
 
-__idata uint8_t ledsToLeft = 0;
-__idata uint8_t lettersToLeft = 0;
-__idata uint8_t ttlLeft = 0;
+uint8_t ledsToLeft = 0;
+uint8_t lettersToLeft = 0;
+uint8_t ttlLeft = 0;
 
-__idata uint8_t ledsToRight = 0;
-__idata uint8_t lettersToRight = 0;
-__idata uint8_t ttlRight = 0;
+uint8_t ledsToRight = 0;
+uint8_t lettersToRight = 0;
+uint8_t ttlRight = 0;
 
-__idata uint8_t brightness = 255;
+uint8_t brightnessIndex = 0;
 
-__idata uint8_t pattern = 0;
-__idata uint16_t frame = 0;
+uint8_t pattern = 0;
+uint16_t frame = 0;
 
-bool frameReady = false;
-bool brightnessChanged = false;
-bool patternChanged = false;
+__bit frameReady = false;
+__bit brightnessChanged = false;
+__bit patternChanged = false;
 
 
 

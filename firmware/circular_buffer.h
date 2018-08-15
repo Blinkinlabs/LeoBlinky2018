@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <stdbool.h>
 
 typedef struct {
     __idata uint8_t* const array;   //Serial receive buffer
