@@ -5,7 +5,7 @@
 #include "circular_buffer.h"
 
 // Commands:
-// Command         size buf byte1            byte 2              byte 3
+// Command         size buf    byte1            byte 2              byte 3
 // LEFT_GEOMETRY    3   [0x01] [ledsToLeft]     [lettersToLeft]     [brightness]
 // RIGHT_GEOMETRY   3   [0x02] [ledsToRight]    [lettersToRight]
 // UPDATE           4   [0x03] [pattern]        [frameH]            [frameL]
