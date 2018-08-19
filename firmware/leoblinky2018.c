@@ -48,7 +48,7 @@ __code const uint8_t streamToPhysical[LED_COUNT] = {
     4, 11,
     5, 10,
     6,  9,
-    8,  7,
+    7,  8,
    16, 17,
 };
 
