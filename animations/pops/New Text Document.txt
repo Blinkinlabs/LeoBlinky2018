@@ -1,0 +1,1 @@
+Use 60FPS for display speed

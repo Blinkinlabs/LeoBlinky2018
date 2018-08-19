@@ -1,0 +1,1 @@
+Use 8FPS for display speed
