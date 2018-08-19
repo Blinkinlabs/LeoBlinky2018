@@ -18,6 +18,8 @@
 #include "usb_cdc.h"
 #include "usb_protocol.h"
 
+#define ENABLE_USB
+
 uint8_t uartByte;
 __bit uartByteReady = false;
 
@@ -31,6 +33,8 @@ __code uint8_t brightnessSteps[] = {
     6,
     21,
 };
+
+__xdata uint8_t frameBuffer[LED_COUNT];
 
 void sendByte(uint8_t byte) {
 //    Receive_Uart_Buf[Uart_Input_Point++] = byte;
@@ -133,9 +137,11 @@ void initBoard() {
     UART0_buf_init();       // Init UART0 and UART1 circular buffers
     UART1_buf_init();
 
+#if defined(ENABLE_USB)
     usb_protocol_reset();   // Reset the serial comms protocol
 
     USBSetup();             // Set up the USB CDC state machine
+#endif
 
     SPIMasterModeSet(0);    // Configure SPI for master mode operation
     animations_initialize();
@@ -159,8 +165,6 @@ void main() {
 
     static uint8_t geometryUpdateTimer = 0;
     static uint8_t outputTimer = 0;
-
-//    static uint8_t Uart_Timeout = 0;
 
     static __bit buttonStyleState = 1;
     static __bit buttonShineState = 1;
@@ -197,6 +201,7 @@ void main() {
         receiveRight();
 
 // Check USB
+#if defined(ENABLE_USB)
         if(UsbConfig)
         {
             if(USBByteCount)   // USB receiving endpoint has data
@@ -250,9 +255,8 @@ void main() {
                 }
             }
         }
+#endif
 
-
-// Handle system changes
         if(brightnessChanged) {
             brightnessChanged = false;
             icn2053_setBrightness(brightnessSteps[brightnessIndex]);
@@ -271,13 +275,11 @@ void main() {
             if(!streamingMode) {
                 sendUpdateRight();
 
-                if(animations_initialized) {
-                    // Note: We're stomping on the protocol memory here
-                    // (but it shouldn't be in use at the same time anyway)
-                    animation_getFrame(frame, usb_protocol_payloadData);
+                if(animation_loaded) {
+                    animation_getFrame(frame, frameBuffer);
 
                     for(temp = 0; temp < LED_COUNT; temp++)
-                        ledData[streamToPhysical[temp]] = usb_protocol_payloadData[temp];
+                        ledData[streamToPhysical[temp]] = frameBuffer[temp];
                 }
                 else {
                     if(pattern == 0)
@@ -305,20 +307,18 @@ void main() {
             // If we are the master, and enough frames have elapsed, update the frame.
             if(!streamingMode
                     && (ledsToLeft == 0)
-                    && (outputTimer > (animations_initialized ? animations_animation.delay : 4))) {
+                    && (outputTimer > (animation_loaded ? animations_animation.delay : 4))) {
                 outputTimer = 0;
 
                 frame += 1;
-                if((animations_initialized) && (frame >= animations_animation.frameCount))
+                if((animation_loaded) && (frame >= animations_animation.frameCount))
                     frame = 0;
 
                 frameReady = true;
             }
 
-            // 244 ticks ~= 1 second
-            // 122 ticks ~= .5 seconds
             geometryUpdateTimer++;
-            if(geometryUpdateTimer > 122) {
+            if(geometryUpdateTimer > GEOMETRY_UPDATE_TICKS) {
                 geometryUpdateTimer = 0;
 
                 sendGeometryLeft();

@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdbool.h>
 
 // Max. number of animations that can be read from the flash (arbitrary)
 #define MAX_ANIMATIONS_COUNT 255
@@ -36,6 +37,7 @@ void animations_load(uint8_t animation);           // Set the current animation
 
 //// Variables for the current animation
 
+extern __bit animation_loaded;       // True if an animation is loaded
 extern __idata struct AnimationHeader_t animations_animation;
 
 void animation_getFrame(uint16_t frame, uint8_t* buffer);      // Load the frame data from this animation

@@ -7,12 +7,12 @@
 
 // Length of the RX buffer
 #ifndef UART0_RX_LEN
-#define UART0_RX_LEN 3          // only received sendGeometryLeft() messages
+#define UART0_RX_LEN 8          // only received sendGeometryLeft() messages
 #endif
 
 // Length of the TX buffer
 #ifndef UART0_TX_LEN
-#define UART0_TX_LEN 3          // Could send sendGeometryRight() or sendUpdateRight()
+#define UART0_TX_LEN 8          // Could send sendGeometryRight() or sendUpdateRight()
 #endif
 
 // Initialize the circular buffer. Assumes that the

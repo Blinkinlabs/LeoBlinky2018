@@ -12,7 +12,7 @@
 
 // Length of the TX buffer
 #ifndef UART1_TX_LEN
-#define UART1_TX_LEN 2          // only sends sendGeometryLeft() messages
+#define UART1_TX_LEN 8          // only sends sendGeometryLeft() messages
 #endif
 
 // Initialize the circular buffer. Assumes that the

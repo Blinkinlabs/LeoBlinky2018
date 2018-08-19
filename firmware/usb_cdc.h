@@ -12,9 +12,7 @@ void USBDeviceEndPointCfg();
 
 void DeviceInterrupt(void) __interrupt (INT_NO_USB);
 
-
 extern uint8_t UsbConfig;
-
 
 extern volatile uint8_t USBByteCount;
 extern volatile uint8_t USBBufOutPoint;

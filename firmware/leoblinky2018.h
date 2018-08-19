@@ -55,6 +55,7 @@ SBIT(BUTTON_SHINE, PORT3_BASE, BUTTON2_PIN);
 
 #if defined(VARIANT_DIS) || defined(VARIANT_ORI)
 
+// TODO: Pretend we have 2 ICN2053s here, because of RX timing problems on ENT boards
 #define ICN2053_COUNT 1
 #define LED_PHYSICAL_CHANNELS (ICN2053_COUNT*16)
 #define LED_COUNT 14
@@ -78,10 +79,15 @@ SBIT(BUTTON_SHINE, PORT3_BASE, BUTTON2_PIN);
 
 #define SYSTEM_TICK_MS 4
 
+// 244 ticks ~= 1 second
+// 122 ticks ~= .5 seconds
+#define GEOMETRY_UPDATE_TICKS 122
+
 // Reset value for watchdog. Sets the watchdog interval:
 // watchdog interval = 65536 / Fsys * (256 - WDOG_FEED_TIME)
 // With a 16MHz clock and WDOG_FEED_TIME = 207, the duration is ~.2s
-#define WDOG_FEED_TIME 207
+//#define WDOG_FEED_TIME 207
+#define WDOG_FEED_TIME 220
 
 
 // Flash page size

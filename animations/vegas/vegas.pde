@@ -9,18 +9,18 @@
 //static final int noiseSeed = 1;
 
 //// ORI
-//static final int pixelsWidth = 7;
-//static final int pixelsHeight = 2;
-
-//static final int randomSeed = 14;
-//static final int noiseSeed = 14;
-
-// ENT
-static final int pixelsWidth = 9;
+static final int pixelsWidth = 7;
 static final int pixelsHeight = 2;
 
-static final int randomSeed = 23;
-static final int noiseSeed = 23;
+static final int randomSeed = 14;
+static final int noiseSeed = 14;
+
+// ENT
+//static final int pixelsWidth = 9;
+//static final int pixelsHeight = 2;
+
+//static final int randomSeed = 23;
+//static final int noiseSeed = 23;
 
 static final int scale = 1;
 
@@ -39,15 +39,13 @@ void setup() {
 }
 
 float phase = 0;
-float phaseSpeed = .12;
+float phaseSpeed = .07;
 
 float crawlers = 1.25;
 
 void draw() {
-  //if(frameCount > seconds*frameRate) {
-  //  exit();
-  //}
   if(phase > 2*PI) {
+    println(frameCount);
     exit();
   }
   
@@ -74,9 +72,8 @@ void draw() {
     }
   }
   popMatrix();
-  
-  float increment = phaseSpeed+noise(phase)/15;
-  phase += increment;
+ 
+  phase += phaseSpeed;
   
   //stroke(255,255);
   //text(increment,50,50);

@@ -2,11 +2,10 @@
 #include "spi_flash.h"
 #include "leoblinky2018.h"
 
-#include <stdbool.h>
-
 __bit animations_initialized = false;
 uint8_t animations_count;
 
+__bit animation_loaded;
 __idata struct AnimationHeader_t animations_animation;
 
 void animations_initialize() {
@@ -46,6 +45,7 @@ void animations_initialize() {
 }
 
 void animations_load(uint8_t animation) {
+    animation_loaded = false;
 
     if(animation >= animations_count)
         return;
@@ -59,21 +59,23 @@ void animations_load(uint8_t animation) {
     flash_read();
 
     animations_animation.delay = animations_animation.delay / SYSTEM_TICK_MS;
-    if(animations_animation.delay == 0)
-        animations_animation.delay = 1;
+    if(animations_animation.delay < 2 )
+        animations_animation.delay = 2;
+
+    animation_loaded = true;
 }
 
 void animation_getFrame(uint16_t frame, uint8_t *buffer)
 {
-//    flash_read(animations_animation.startingAddress + frame*LED_COUNT,
-//               LED_COUNT,
-//               buffer);
-    flash_config.address = animations_animation.startingAddress + frame*animations_animation.ledCount;
+    if(frame > animations_animation.frameCount)
+        frame = 0;
 
     if(LED_COUNT < animations_animation.ledCount)
         flash_config.length = LED_COUNT;
     else
         flash_config.length = animations_animation.ledCount;
+
+    flash_config.address = animations_animation.startingAddress + frame*animations_animation.ledCount;
 
     flash_config.data = buffer;
     flash_read();

@@ -176,6 +176,13 @@ void USBDeviceEndPointCfg()
 void DeviceInterrupt(void) __interrupt (INT_NO_USB)                             //USB interrupt service routine, using register set 1
 {
     uint16_t len;
+
+    // Ignore all interrupts if we are supposed to be suspended?
+    if ( USB_MIS_ST & bUMS_SUSPEND ) {
+        USB_INT_FG = 0xFF;
+        return;
+    }
+
     if(UIF_TRANSFER)                                                            //USB transfer completion flag
     {
         switch (USB_INT_ST & (MASK_UIS_TOKEN | MASK_UIS_ENDP))
@@ -520,23 +527,23 @@ void DeviceInterrupt(void) __interrupt (INT_NO_USB)                             
     if (UIF_SUSPEND)                                                            //USB bus suspend/wake up
     {
         UIF_SUSPEND = 0;
-//        if ( USB_MIS_ST & bUMS_SUSPEND )                                             //Hang
-//        {
-//#ifdef DE_PRINTF
-//            printf( "suspend\n" );                                                             //Sleep state
-//#endif
-//            while ( XBUS_AUX & bUART0_TX )
-//            {
-//                ;    //Waiting for transmission to complete
-//            }
-//            SAFE_MOD = 0x55;
-//            SAFE_MOD = 0xAA;
-//            WAKE_CTRL = bWAK_BY_USB | bWAK_RXD0_LO | bWAK_RXD1_LO;                      //USB or RXD0/1 can be woken up when there is a signal
-//            PCON |= PD;                                                                 //Sleep
-//            SAFE_MOD = 0x55;
-//            SAFE_MOD = 0xAA;
-//            WAKE_CTRL = 0x00;
-//        }
+        if ( USB_MIS_ST & bUMS_SUSPEND )                                             //Hang
+        {
+#ifdef DE_PRINTF
+            printf( "suspend\n" );                                                             //Sleep state
+#endif
+            while ( XBUS_AUX & bUART0_TX )
+            {
+                ;    //Waiting for transmission to complete
+            }
+            SAFE_MOD = 0x55;
+            SAFE_MOD = 0xAA;
+            WAKE_CTRL = bWAK_BY_USB | bWAK_RXD0_LO | bWAK_RXD1_LO;                      //USB or RXD0/1 can be woken up when there is a signal
+            PCON |= PD;                                                                 //Sleep
+            SAFE_MOD = 0x55;
+            SAFE_MOD = 0xAA;
+            WAKE_CTRL = 0x00;
+        }
     }
     else {                                                                      //Unexpected interruption, impossible situation
         USB_INT_FG = 0xFF;                                                      //Clear interrupt flag
