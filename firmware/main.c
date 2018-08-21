@@ -259,6 +259,10 @@ void main() {
 
         if(brightnessChanged) {
             brightnessChanged = false;
+
+            if(brightnessIndex >= sizeof(brightnessSteps))
+                brightnessIndex = sizeof(brightnessSteps) - 1;
+
             icn2053_setBrightness(brightnessSteps[brightnessIndex]);
         }
 
